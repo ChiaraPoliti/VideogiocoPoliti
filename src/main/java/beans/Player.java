@@ -2,8 +2,11 @@ package beans;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
+
 import javax.swing.ImageIcon;
 import core.TileMap;
+import logic.CollisionManager;
 
 public class Player extends MovableGameObject {
 	/**
@@ -16,12 +19,11 @@ public class Player extends MovableGameObject {
 	private int score;
 	private int hp;
 	
-	//public static final double g = 1.0;
 	public static final int MAX_VEL_X = 5;
-	public static final int NORMAL_HEIGHT = 60;
-	public static final int NORMAL_WIDTH = 45;
-	public static final int BIG_HEIGHT = 80;
-	public static final int BIG_WIDTH = 55;
+	public static final int NORMAL_HEIGHT = 40;
+	public static final int NORMAL_WIDTH = 25;
+	public static final int BIG_HEIGHT = 60;
+	public static final int BIG_WIDTH = 35;
 	public static final int JUMP_VEL = -15;
 	
 	public Player(int x, int y) {
@@ -61,10 +63,13 @@ public class Player extends MovableGameObject {
 	 * Fa crescere le misure di Mario.
 	 **/
 	public void toBig() {
-		this.isBig = true;
-		this.y -= (this.BIG_HEIGHT - this.NORMAL_HEIGHT);
-		this.width = BIG_WIDTH;
-		this.height = BIG_HEIGHT;
+		if (!isBig) {
+			this.isBig = true;
+			this.width = BIG_WIDTH;
+			this.height = BIG_HEIGHT;
+		}
+		
+		//this.y -= (this.BIG_HEIGHT - this.NORMAL_HEIGHT);
 	}
 	
 	/**
@@ -72,7 +77,7 @@ public class Player extends MovableGameObject {
 	 **/
 	public void toSmall() {
 		this.isBig = false;
-		this.y -= (this.BIG_HEIGHT - this.NORMAL_HEIGHT);
+		//this.y -= (this.BIG_HEIGHT - this.NORMAL_HEIGHT);
 		this.width = NORMAL_WIDTH;
 		this.height = NORMAL_HEIGHT;
 	}
@@ -81,12 +86,17 @@ public class Player extends MovableGameObject {
 	 * Coordina il salto.
 	 **/
 	public void jump() {
-		if (isOnGround) {
-			this.vel_y = JUMP_VEL;
+		if (!isOnGround) {
+			this.setVel_y(JUMP_VEL);
 			this.isJumping = true;
 			this.isOnGround = false;
 		}
 	}
+	
+	/* void fineSalto() {
+		this.isOnGround = true;
+		this.isJumping = false;
+	}*/
 	
 	/**
 	 * Acquisisce il valore della moneta per aumentare il punteggio
@@ -109,24 +119,81 @@ public class Player extends MovableGameObject {
 	@Override
 	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
 		if (isMovingRight) {
-			this.vel_x = MAX_VEL_X; 
+			this.setVel_x(MAX_VEL_X); 
 		} else if (isMovingLeft) {
-			this.vel_x = -MAX_VEL_X;
+			this.setVel_x (-MAX_VEL_X);
 		}else {
-			this.vel_x = 0;
+			this.setVel_x(0);
 		}
-		
-		super.update(mapWidthPixels, mapHeightPixels, tileMap);
-		
-		if (isOnGround && isJumping) {
-            isJumping = false;
+		//this.vel_y += g;
+
+     // Gestione delle collisioni orizzontali
+        int nextX = this.x + this.vel_x;
+        Rectangle futureBoundsX = new Rectangle((int)nextX, this.y, this.width, this.height);
+        CollisionManager cm = new CollisionManager();
+        if (cm.checkMapCollision(futureBoundsX, tileMap)) {
+            this.vel_x = 0; // Ferma il movimento orizzontale se si scontra
+            // Riposiziona l'oggetto per non farlo incastrare nel muro
+            // (logica più precisa gestita nel CollisionManager)
+        } else {
+        	this.x = nextX;
         }
         
-        if (this.y > mapHeightPixels + 100) {
-            System.out.println("Mario è caduto fuori dalla mappa! Game Over o Reset.");
-            // Implementa qui la logica di game over/reset
+        // Gestione delle collisioni verticali
+        /*if (!this.isOnGround) {
+        	this.vel_y += g;
+        }*/
+        if (this.isJumping && this.isOnGround) {
+        	this.vel_y = JUMP_VEL;
+        	this.isOnGround = false;
         }
-		
+        
+        this.vel_y += g;
+        
+        int nextY = this.y + this.vel_y;
+        Rectangle futureBoundsY = new Rectangle(this.x, (int)nextY, this.width, this.height);
+        if (cm.checkMapCollision(futureBoundsY, tileMap)) {
+            if (this.vel_y > 0) { // Collisione dal basso ( sta cadendo )
+            	this.vel_y = 0;
+            	//this.y = (futureBoundsY.y / TileMap.TILE_SIZE) * TileMap.TILE_SIZE - this.height;
+                this.isOnGround = true;
+                int collisionRow = (this.y + this.height) / TileMap.TILE_SIZE;
+                this.y = collisionRow * TileMap.TILE_SIZE - this.height;
+            } else { // collisione alto, salta
+            	this.vel_y = 0;
+            	int collisionRow = (this.y / TileMap.TILE_SIZE);
+                this.y = (collisionRow + 1) * TileMap.TILE_SIZE;
+            }
+        } else {
+        	this.y = nextY;
+        	this.isOnGround = false;
+        }
+        
+     // Aggiorna la posizione finale dopo le collisioni
+        //this.x += this.vel_x;
+        //this.y += this.vel_y;
+        
+     // Limiti dello schermo
+        if (this.x < 0) {
+            this.x = 0;
+        }
+        if (this.x + this.width > mapWidthPixels) {
+            this.x = mapWidthPixels - this.width;
+        }
+        
+        if (this.y > mapHeightPixels) {
+        	this.die();
+        }
+	}
+	
+	
+	
+	public void die() {
+		this.hp = 0;
+	}
+	
+	public void bounce() {
+		this.setVel_y(-8);
 	}
 
 	@Override
@@ -192,14 +259,14 @@ public class Player extends MovableGameObject {
 	/**
 	 * @return the vel_x
 	 */
-	public int getVel_x() {
+	public float getVel_x() {
 		return vel_x;
 	}
 
 	/**
 	 * @return the vel_y
 	 */
-	public int getVel_y() {
+	public float getVel_y() {
 		return vel_y;
 	}
 

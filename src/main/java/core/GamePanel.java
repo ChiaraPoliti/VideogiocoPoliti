@@ -8,18 +8,21 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import core.TileMap;
-import core.Tile;
+//import core.TileMap;
+//import core.Tile;
 import beans.Block;
 import beans.Coin;
 import beans.Enemy;
+import beans.Goomba;
 import beans.Player;
 import beans.PowerUp;
-import beans.QuestionBlock;
-import beans.Mushroom;
-import enums.itemType;
+import logic.CollisionManager;
+//import beans.QuestionBlock;
+//import beans.Mushroom;
+//import enums.itemType;
 
 public class GamePanel extends JPanel implements Runnable,KeyListener {
 	private Thread gameThread;
@@ -35,6 +38,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
     private TileMap tileMap;
     private int cameraX;
     private int cameraY;
+    private CollisionManager collisionManager;
 	
 	public GamePanel() {
 		Player mario = new Player (100,112);
@@ -42,7 +46,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
 		this.enemies = new ArrayList<>();
 	    this.coins = new ArrayList<>();
 	    this.powerUps = new ArrayList<>();
-	    this.blocks = new ArrayList<>();
+	    this.blocks = new ArrayList<>(); 
 		
 		List<String> mapLayersPaths = new ArrayList<>();
 		mapLayersPaths.add("/maps/marioTileset_background.csv"); 
@@ -60,6 +64,13 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         cameraX = mario.getX()-this.WINDOW_WIDTH/2;
         cameraY = mario.getY() - this.WINDOW_HEIGHT/2;
         clampCamera();
+        
+        this.collisionManager = new CollisionManager();
+        // Aggiungi un Goomba di prova
+        enemies.add(new Goomba(250, 112));
+        
+        // Aggiungi una moneta di prova
+        coins.add(new Coin(400, 112));
         
         setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         setLayout(new BorderLayout()); // Usa BorderLayout per il bottone iniziale
@@ -137,14 +148,21 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
 
     private void update() {
         mario.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
-        for (int i = 0; i < enemies.size(); i++) {
-            Enemy enemy = enemies.get(i);
+        
+        // Rimuovi i nemici morti usando un Iterator per evitare problemi di concorrenza
+        Iterator<Enemy> enemyIterator = enemies.iterator();
+        while (enemyIterator.hasNext()) {
+            Enemy enemy = enemyIterator.next();
             enemy.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
-            //la rimozione
+            if (!enemy.isAlive() && enemy.isRemovable()) {
+                enemyIterator.remove();
+            }
         }
         
-        for (int i = 0; i < coins.size(); i++) {
-            Coin coin = coins.get(i);
+        collisionManager.checkAllCollisions(mario, enemies, blocks, tileMap);
+        
+        for (int j = 0; j < coins.size(); j++) {
+            Coin coin = coins.get(j);
             coin.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
             // Gestisci la rimozione delle monete raccolte
         }
@@ -167,7 +185,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         clampCamera();
         // devo mettere aggiornamenti di tutti
         //devo mettere le collisioni (rimandi ai metodi della classe giusta)
-        //System.out.println("Updating game state..."); // Debugging
+        collisionManager.checkAllCollisions(mario, enemies, blocks, tileMap);
     }
 	
     private void clampCamera() {

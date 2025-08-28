@@ -11,17 +11,17 @@ public class Goomba extends Enemy {
 	private Image goombaSmash;
 	private long deathTime = 0;
 	
-	public static final int HEIGHT_GOOMBA = 3;
-	public static final int WIDTH_GOOMBA = 5;
+	public static final int HEIGHT_GOOMBA = 15;
+	public static final int WIDTH_GOOMBA = 20;
 	public static final double GOOMBA_DAMAGE = 0.5; 
 	public static final long SQUASH_DURATION = 1000;
 
-	public Goomba(int x, int y, int width, int height, Image image) {
+	public Goomba(int x, int y) {
 		super(x,y, WIDTH_GOOMBA, HEIGHT_GOOMBA, null);
 		
 		
 		try {
-			java.net.URL imageUrl = getClass().getResource("/images/goomba.png");
+			java.net.URL imageUrl = getClass().getResource("/tiles/tile_8.png");
 	        if (imageUrl != null) {
 	        	this.image = new ImageIcon(imageUrl).getImage(); // Assegna all'immagine ereditata
 	            System.out.println("Immagine di goomba caricata con successo da: " + imageUrl);

@@ -1,124 +1,104 @@
 package logic;
 
-
+import java.awt.Rectangle;
+import java.util.List;
 import beans.Player;
-import core.Tile;
 import core.TileMap;
-
-import java.awt.Rectangle; 
+import beans.Enemy;
+import beans.Block;
 
 public class CollisionManager {
 
-    private TileMap tileMap;
-    private Player mario; // Riferimento al giocatore
+    /**
+     * Controlla tutte le collisioni tra gli oggetti di gioco.
+     */
+    public void checkAllCollisions(Player mario, List<Enemy> enemies, List<Block> blocks, TileMap tileMap) {
+        // Controlla le collisioni tra Mario e le piastrelle solide
+        checkPlayerTileCollisions(mario, tileMap);
 
-    // Costruttore
-    public CollisionManager(TileMap tileMap, Player mario) {
-        this.tileMap = tileMap;
-        this.mario = mario;
+        // Controlla le collisioni tra Mario e i nemici
+        checkPlayerEnemyCollisions(mario, enemies);
     }
 
     /**
-     * Controlla le collisioni di Mario con le tile della mappa (terreno, blocchi).
-     * Questo metodo dovrebbe essere chiamato in GamePanel.update() dopo aver aggiornato la posizione di Mario.
+     * Gestisce le collisioni tra il giocatore e le piastrelle solide della mappa.
      */
-    public void checkMarioTileCollisions() {
-        // Ottieni la bounding box di Mario per i calcoli di collisione
-        Rectangle marioBounds = mario.getBounds();
+    private void checkPlayerTileCollisions(Player mario, TileMap tileMap) {
+        // Salva le posizioni future per la collisione
+        int nextX = (int) (mario.getX() + mario.getVel_x());
+        int nextY = (int) (mario.getY() + mario.getVel_y());
 
-        // Determina le colonne e righe di tile che Mario interseca
-        int startTileCol = marioBounds.x / TileMap.TILE_SIZE;
-        int endTileCol = (marioBounds.x + marioBounds.width) / TileMap.TILE_SIZE;
-        int startTileRow = marioBounds.y / TileMap.TILE_SIZE;
-        int endTileRow = (marioBounds.y + marioBounds.height) / TileMap.TILE_SIZE;
+        // Collisioni orizzontali
+        Rectangle futureBoundsX = new Rectangle(nextX, mario.getY(), mario.getWidth(), mario.getHeight());
+        if (checkMapCollision(futureBoundsX, tileMap)) {
+            mario.setVel_x(0);
+        }
 
-        // Assicurati che i limiti non vadano fuori dalla mappa
-        startTileCol = Math.max(0, startTileCol);
-        endTileCol = Math.min(tileMap.getCols() - 1, endTileCol);
-        startTileRow = Math.max(0, startTileRow);
-        endTileRow = Math.min(tileMap.getRows() - 1, endTileRow);
+        // Collisioni verticali
+        Rectangle futureBoundsY = new Rectangle(mario.getX(), nextY, mario.getWidth(), mario.getHeight());
+        if (checkMapCollision(futureBoundsY, tileMap)) {
+            /*if (mario.getVel_y() > 0) { // Mario sta scendendo
+                mario.setOnGround(true);
+            } else if (mario.getVel_y() < 0) { // Mario sta saltando
+                mario.setJumping(false);
+            }*/
+        	// Per un atterraggio corretto
+            // Calcola la posizione della riga in cui è avvenuta la collisione
+            int collisionRow = (mario.getY() + mario.getHeight()) / TileMap.TILE_SIZE;
+            // Sposta il giocatore appena sopra il tile, per evitare che lo attraversi
+            mario.setY(collisionRow * TileMap.TILE_SIZE - mario.getHeight());
+            
+            mario.setOnGround(true);
+            mario.setJumping(false);
+        } else {
+            mario.setOnGround(false);
+        	mario.setVel_y(nextY);
+        }
+    }
+    
+    /**
+     * Controlla se un rettangolo si scontra con una piastrella solida.
+     */
+    public boolean checkMapCollision(Rectangle bounds, TileMap tileMap) {
+        int startCol = bounds.x / TileMap.TILE_SIZE;
+        int endCol = (bounds.x + bounds.width) / TileMap.TILE_SIZE;
+        int startRow = bounds.y / TileMap.TILE_SIZE;
+        int endRow = (bounds.y + bounds.height) / TileMap.TILE_SIZE;
 
-        boolean onGround = false; // Flag per sapere se Mario è a terra
+        // Limita i cicli entro i confini della mappa
+        startCol = Math.max(0, startCol);
+        endCol = Math.min(tileMap.getCols() - 1, endCol);
+        startRow = Math.max(0, startRow);
+        endRow = Math.min(tileMap.getRows() - 1, endRow);
 
-        // Cicla attraverso le tile che Mario sta potenzialmente intersecando
-        for (int row = startTileRow; row <= endTileRow; row++) {
-            for (int col = startTileCol; col <= endTileCol; col++) {
-                // Ottieni la tile dal layer del terreno
-                Tile tile = tileMap.getTile(TileMap.TERRENO_LAYER, row, col);
-
-                if (tile != null && tile.isSolid()) {
-                    // Calcola la bounding box della tile
-                    Rectangle tileBounds = new Rectangle(
-                            col * TileMap.TILE_SIZE,
-                            row * TileMap.TILE_SIZE,
-                            TileMap.TILE_SIZE,
-                            TileMap.TILE_SIZE
-                    );
-
-                    // Se Mario e la tile si intersecano
-                    if (marioBounds.intersects(tileBounds)) {
-                        // Gestisci la collisione
-                        handleSolidTileCollision(mario, marioBounds, tileBounds, tile);
-
-                        // Se Mario è sopra una tile solida, è a terra
-                        if (marioBounds.y < tileBounds.y && Player.getVel_y() >= 0) {
-                            onGround = true;
-                        }
+        for (int r = startRow; r <= endRow; r++) {
+            for (int c = startCol; c <= endCol; c++) {
+                if (tileMap.isTileSolid(c, r)) {
+                    Rectangle tileBounds = new Rectangle(c * TileMap.TILE_SIZE, r * TileMap.TILE_SIZE, TileMap.TILE_SIZE, TileMap.TILE_SIZE);
+                    if (bounds.intersects(tileBounds)) {
+                        return true;
                     }
                 }
             }
         }
-
-        // Imposta lo stato a terra di Mario
-        mario.setOnGround(onGround);
-
-        // Controllo per caduta fuori mappa (solo se non ci sono collisioni con il terreno)
-        if (!onGround && mario.getBounds().y + mario.getBounds().height > tileMap.getRows() * TileMap.TILE_SIZE) {
-            // Mario è caduto sotto la mappa
-            mario.setY((tileMap.getRows() * TileMap.TILE_SIZE) - mario.getBounds().height);
-            mario.setY(0);
-            mario.setOnGround(true);
-        }
+        return false;
     }
 
     /**
-     * Gestisce la collisione di Mario con una tile solida.
-     * Determina da quale lato Mario ha colpito la tile e reagisce di conseguenza.
+     * Gestisce le collisioni tra il giocatore e i nemici.
      */
-    private void handleSolidTileCollision(Player mario, Rectangle marioBounds, Rectangle tileBounds, Tile tile) {
-        // Calcola la sovrapposizione-
-        Rectangle intersection = marioBounds.intersection(tileBounds);
-
-        // Collisione dal basso (Mario salta contro un blocco)
-        if (intersection.height > intersection.width && mario.getyVel() < 0) { // Mario si sta muovendo verso l'alto
-            mario.setY(tileBounds.y + tileBounds.height); // Riposiziona Mario sotto il blocco
-            mario.setyVel(0); // Ferma il movimento verticale
-            if (tile.isQuestionBlock()) {
-                // Logica per blocchi domanda (es. rilasciare moneta/power-up)
-                // Questo dovrebbe notificare GamePanel o la TileMap che il blocco è stato colpito
-                System.out.println("Mario ha colpito un Blocco Domanda!");
-                // tile.setQuestionBlock(false); // Potresti voler cambiare lo stato del blocco domanda
-                // GamePanel dovrà gestire la creazione della moneta/power-up e la modifica del tile
-            } else if (tile.isBreakable()) {
-                // Logica per blocchi rompibili (es. distruggere il blocco)
-                System.out.println("Mario ha colpito un Blocco Rompibile!");
-                // tile.setBreakable(false); // Il blocco deve essere rimosso o cambiato nel GamePanel
+    private void checkPlayerEnemyCollisions(Player mario, List<Enemy> enemies) {
+        for (Enemy enemy : enemies) {
+            if (enemy.isAlive() && mario.getBounds().intersects(enemy.getBounds())) {
+                // Collisione tra Mario e un nemico rilevata
+                // Se Mario sta scendendo e il suo piede è sopra il nemico
+                if (mario.getVel_y() > 0 && mario.getBounds().y + mario.getHeight() < enemy.getBounds().y + enemy.getHeight()) {
+                    enemy.die();
+                    mario.setVel_y(-10); // Piccolo rimbalzo per feedback
+                } else {
+                    mario.takeDamage(1); // Mario viene danneggiato
+                }
             }
-        }
-        // Collisione dall'alto (Mario atterra su un blocco)
-        else if (intersection.height > intersection.width && mario.getyVel() >= 0) { // Mario si sta muovendo verso il basso o fermo
-            mario.setY(tileBounds.y - marioBounds.height); // Riposiziona Mario sopra il blocco
-            mario.setyVel(0); // Ferma la caduta
-            mario.setOnGround(true);
-        }
-        // Collisione laterale (Mario si muove orizzontalmente contro un blocco)
-        else if (intersection.width > intersection.height) { // Collisione orizzontale
-            if (mario.getX() < tileBounds.x) { // Collisione da sinistra
-                mario.setX(tileBounds.x - marioBounds.width);
-            } else { // Collisione da destra
-                mario.setX(tileBounds.x + tileBounds.width);
-            }
-            mario.setxVel(0); // Ferma il movimento orizzontale
         }
     }
 }

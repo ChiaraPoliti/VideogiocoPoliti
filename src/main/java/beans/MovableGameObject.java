@@ -1,7 +1,8 @@
 package beans;
 
-import java.awt.Graphics2D;
+//import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 
 import core.TileMap;
 
@@ -23,19 +24,94 @@ public abstract class MovableGameObject extends GameObject {
 		this.isMovingRight = false;
 	}
 
-	@Override
-	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
-        this.x += this.vel_x;
+	//@Override
+	/*public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
+        this.vel_y += g;
 
-        
-        if (!isOnGround) {
-            this.vel_y += g;
+     // Gestione delle collisioni orizzontali
+        int nextX = this.x + this.vel_x;
+        Rectangle futureBoundsX = new Rectangle((int)nextX, this.y, this.width, this.height);
+        if (checkMapCollision(futureBoundsX, tileMap)) {
+            this.vel_x = 0; // Ferma il movimento orizzontale se si scontra
+            // Riposiziona l'oggetto per non farlo incastrare nel muro
+            // (logica più precisa gestita nel CollisionManager)
         }
+        
+        // Gestione delle collisioni verticali
+        int nextY = this.y + this.vel_y;
+        Rectangle futureBoundsY = new Rectangle(this.x, (int)nextY, this.width, this.height);
+        if (checkMapCollision(futureBoundsY, tileMap)) {
+            if (this.vel_y > 0) { // Collisione dal basso ( sta cadendo )
+            	this.y = (futureBoundsY.y / TileMap.TILE_SIZE) * TileMap.TILE_SIZE - this.height;
+                this.isOnGround = true;
+            } else if (this.vel_y <0) { // collisione alto, salta
+            	this.y = (futureBoundsY.y / TileMap.TILE_SIZE) * TileMap.TILE_SIZE + TileMap.TILE_SIZE;
+            }
+            this.vel_y = 0; // Ferma il movimento verticale
+        } else {
+        	this.isOnGround = false;
+        }
+        
+     // Aggiorna la posizione finale dopo le collisioni
+        this.x += this.vel_x;
+        this.y += this.vel_y;
+        
+        // Limiti dello schermo
+        if (this.x < 0) {
+            this.x = 0;
+        }
+        if (this.x + this.width > mapWidthPixels) {
+            this.x = mapWidthPixels - this.width;
+        }
+    }*/
+    
+    /*// Metodo per il controllo delle collisioni con le tile solide
+	protected boolean checkMapCollision(Rectangle bounds, TileMap tileMap) {
+        int startCol = bounds.x / TileMap.TILE_SIZE;
+        int endCol = (bounds.x + bounds.width - 1) / TileMap.TILE_SIZE;
+        int startRow = bounds.y / TileMap.TILE_SIZE;
+        int endRow = (bounds.y + bounds.height - 1) / TileMap.TILE_SIZE;
+
+        // Assicurati di non andare fuori dai limiti della mappa
+        startCol = Math.max(0, startCol);
+        endCol = Math.min(tileMap.getCols() - 1, endCol);
+        startRow = Math.max(0, startRow);
+        endRow = Math.min(tileMap.getRows() - 1, endRow);
+
+        for (int r = startRow; r <= endRow; r++) {
+            for (int c = startCol; c <= endCol; c++) {
+                if (tileMap.isTileSolid(c, r)) {
+                    Rectangle tileBounds = new Rectangle(c * TileMap.TILE_SIZE, r * TileMap.TILE_SIZE, TileMap.TILE_SIZE, TileMap.TILE_SIZE);
+                    if (bounds.intersects(tileBounds)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }*/
+	
+	public abstract void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap);
+	//public abstract void draw(Graphics2D g, int cameraX, int cameraY);
+
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
+    }
+    
+    // Aggiungi i getters e setters mancanti o modificati per usare i float
+    public float getVel_x() { return vel_x; }
+    public float getVel_y() { return vel_y; }
+    public void setVel_x(int vel_x) { this.vel_x = vel_x; }
+    public void setVel_y(int vel_y) { this.vel_y = vel_y; }
+    public boolean isOnGround() { return isOnGround; }
+    public void setOnGround(boolean onGround) { this.isOnGround = onGround; }
+    public void setMovingLeft(boolean isMovingLeft) { this.isMovingLeft = isMovingLeft; }
+    public void setMovingRight(boolean isMovingRight) { this.isMovingRight = isMovingRight; }
+}
 
         
-        int nextY = (int) (this.y + this.vel_y);
-
-       
+        
+        /*
         boolean collidedVertically = false;
         if (this.vel_y > 0 || (this.vel_y == 0 && !isOnGround)) { 
             int tileBelowY = (nextY + height) / TileMap.TILE_SIZE;
@@ -120,4 +196,4 @@ public abstract class MovableGameObject extends GameObject {
 	@Override
 	public abstract void draw(Graphics2D g, int cameraX, int cameraY);
 
-}
+}*/
