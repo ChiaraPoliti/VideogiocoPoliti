@@ -14,11 +14,11 @@ public class Koopa extends Enemy {
 	private boolean isInShell;
 	private Image koopaSmash;
 	
-	public static final int WIDTH_KOOPA = 4;
-	public static final int HEIGHT_KOOPA = 6;
+	public static final int WIDTH_KOOPA = 25;
+	public static final int HEIGHT_KOOPA = 30;
 	public static final int WIDTH_SHELL = 4;
 	public static final int HEIGHT_SHELL = 4;
-    private static final long SHELL_DURATION = 5000;
+    private static final long SHELL_DURATION = 50000;
     public static final double KOOPA_DAMAGE = 0.5;
     
     public long shellStartTime = 0;
@@ -30,21 +30,21 @@ public class Koopa extends Enemy {
 		this.isInShell = false;
 		
 		try {
-			java.net.URL imageUrl = getClass().getResource("/images/koopa.png");
+			java.net.URL imageUrl = getClass().getResource("/tiles/tile_10.png");
 	        if (imageUrl != null) {
 	        	this.image = new ImageIcon(imageUrl).getImage(); // Assegna all'immagine ereditata
 	            System.out.println("Immagine di koopa caricata con successo da: " + imageUrl);
 	        } else {
-	            System.err.println("ERRORE: Immagine di koopa non trovata nel classpath: /images/goomba.png");
+	            System.err.println("ERRORE: Immagine di koopa non trovata nel classpath: /tiles/tile_10.png");
 	            this.image = null;
 	        }
 	        
 	     // Caricamento dell'immagine "smash" (se esiste)
-            java.net.URL koopaSmashUrl = getClass().getResource("/images/stoppedKoopa.png"); 
+            java.net.URL koopaSmashUrl = getClass().getResource("/tiles/tile_9.png"); 
             if (koopaSmashUrl != null) {
                 this.koopaSmash = new ImageIcon(koopaSmashUrl).getImage(); 
             } else {
-                System.err.println("ERRORE: Immagine Guscio Koopa non trovata: /images/stoppedGoomba.png");
+                System.err.println("ERRORE: Immagine Guscio Koopa non trovata: /tiles/tile_9.png");
                 this.koopaSmash = null;
             }
 	    } catch (Exception e) {
@@ -63,12 +63,25 @@ public class Koopa extends Enemy {
 	
 	@Override
 	public void die() {
-		this.isAlive = false;
-		this.isInShell = false;
+		this.isAlive = true;
+		this.isInShell = true;
 		this.isDangerous = false;
+		this.isRemovable = false;
 		this.vel_x = 0;
 		this.vel_y = 0;
 	}
+	
+	public void sparito() {
+		this.isAlive = false;
+		this.isRemovable = true;
+		this.isInShell = false;
+		this.isDangerous = false;
+		this.isRemovable = true;
+		
+	}
+	
+	
+	
 	
 
 	@Override
@@ -169,7 +182,7 @@ public class Koopa extends Enemy {
 	 public void upgradeStatus() {
 	     if (isInShell) {
 	    	 long currentTime = System.currentTimeMillis();
-	         if (currentTime - shellStartTime >= SHELL_DURATION) {
+	         if (currentTime - shellStartTime <= SHELL_DURATION) {
 	            toNormalSize();
 	         }
 	     }

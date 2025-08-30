@@ -29,21 +29,21 @@ public class QuestionBlock extends Block {
 		this.originalY = y;
 		
 		try {
-			java.net.URL imageUrl = getClass().getResource("/images/questionBlock.png");
+			java.net.URL imageUrl = getClass().getResource("/tiles/tile_2.png");
 	        if (imageUrl != null) {
 	        	this.image = new ImageIcon(imageUrl).getImage(); // Assegna all'immagine ereditata
 	            System.out.println("Immagine di blocco ? caricata con successo da: " + imageUrl);
 	        } else {
-	            System.err.println("ERRORE: Immagine di blocco ? non trovata nel classpath: /images/questionBlock.png");
+	            System.err.println("ERRORE: Immagine di blocco ? non trovata nel classpath: /tiles/tile_2.png");
 	            this.image = null;
 	        }
 	        
 	     // Caricamento dell'immagine vuota (se esiste)
-            java.net.URL emptyBlockUrl = getClass().getResource("/images/emptyBlock.png"); 
+            java.net.URL emptyBlockUrl = getClass().getResource("/tiles/tile_3.png"); 
             if (emptyBlockUrl != null) {
                 this.emptyBlock = new ImageIcon(emptyBlockUrl).getImage(); 
             } else {
-                System.err.println("ERRORE: Immagine blocco vuoto non trovata: /images/emptyBlock.png");
+                System.err.println("ERRORE: Immagine blocco vuoto non trovata: /tiles/tile_3.png");
                 this.emptyBlock = null;
             }
 	    } catch (Exception e) {
@@ -82,6 +82,7 @@ public class QuestionBlock extends Block {
         case COIN:
             Coin coin = new Coin(itemX, itemY);
             coin.setVel_y(-BOUNCE_SPEED); // La moneta "salta" verso l'alto
+      
             return coin;
             
         case MUSHROOM:
@@ -140,7 +141,7 @@ public class QuestionBlock extends Block {
 			} else {
 				g.setColor(Color.YELLOW);
 			}
-			g.fillRect (this.x, this.y, this.width, this.height);
+			g.fillRect (screenX, screenY, this.width, this.height);
 		}
 		
 		

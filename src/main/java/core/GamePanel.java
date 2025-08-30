@@ -14,9 +14,13 @@ import java.util.List;
 //import core.TileMap;
 //import core.Tile;
 import beans.Block;
+import beans.BreakableBlock;
 import beans.Coin;
 import beans.Enemy;
+import beans.GameObject;
 import beans.Goomba;
+import beans.Koopa;
+import beans.Mushroom;
 import beans.Player;
 import beans.PowerUp;
 import logic.CollisionManager;
@@ -66,11 +70,25 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         clampCamera();
         
         this.collisionManager = new CollisionManager();
-        // Aggiungi un Goomba di prova
-        enemies.add(new Goomba(250, 112));
         
-        // Aggiungi una moneta di prova
+        // Aggiungi nemici
+        enemies.add(new Goomba(250, 112));
+        enemies.add(new Goomba(550, 112));
+        enemies.add(new Koopa(1018, 112));
+        
+        
+        // Aggiungi una moneta
         coins.add(new Coin(400, 112));
+        //coins.add(new Coin ());
+        //coins.add(new Coin ());
+        //coins.add(new Coin ());
+        
+        //Aggiungo blocchi
+        blocks.add(new BreakableBlock (192,80));
+        
+        //Aggiungo Power Up
+        powerUps.add(new Mushroom (193,80));
+        
         
         setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         setLayout(new BorderLayout()); // Usa BorderLayout per il bottone iniziale
@@ -146,8 +164,12 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         }
     }
 
-    private void update() {
-        mario.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
+    /*private void update() {
+    	int mapWidthPixels = tileMap.getCols() * TileMap.TILE_SIZE;
+    	int mapHeightPixels = tileMap.getRows() * TileMap.TILE_SIZE;
+
+    	mario.update(mapWidthPixels, mapHeightPixels, tileMap);
+        //mario.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
         
         // Rimuovi i nemici morti usando un Iterator per evitare problemi di concorrenza
         Iterator<Enemy> enemyIterator = enemies.iterator();
@@ -186,22 +208,130 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         // devo mettere aggiornamenti di tutti
         //devo mettere le collisioni (rimandi ai metodi della classe giusta)
         collisionManager.checkAllCollisions(mario, enemies, blocks, tileMap);
+    }*/
+    
+    private void update() {
+        int mapWidthPixels = tileMap.getCols() * TileMap.TILE_SIZE;
+        int mapHeightPixels = tileMap.getRows() * TileMap.TILE_SIZE;
+
+        //Update Player
+        mario.update(mapWidthPixels, mapHeightPixels, tileMap);
+
+        // Update Nemici e rimozione morti
+        Iterator<Enemy> enemyIterator = enemies.iterator();
+        while (enemyIterator.hasNext()) {
+            Enemy enemy = enemyIterator.next();
+            enemy.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
+            if (!enemy.isAlive() && enemy.isRemovable()) {
+                enemyIterator.remove();
+            }
+        }
+
+        // collisioni nemici e mappa
+        collisionManager.checkPlayerTileCollisions(mario, tileMap);
+        collisionManager.checkPlayerEnemyCollisions(mario, enemies);
+        
+        
+        //update blocchi
+        for (Block block : blocks) {
+            block.update(mapWidthPixels, mapHeightPixels, tileMap);
+        }
+        collisionManager.checkPlayerBlockCollisions(mario, blocks, coins, powerUps);
+        
+        //update monete
+        Iterator<Coin> coinIterator = coins.iterator();
+        while(coinIterator.hasNext()) {
+        	Coin coin = coinIterator.next();
+            coin.update(WINDOW_WIDTH, WINDOW_HEIGHT, tileMap);
+            // Rimuovi la moneta se raccolta
+            if (coin.isCollected()) {
+                coinIterator.remove();
+            }
+        }
+        
+        //update powerup
+        Iterator<PowerUp> powerUpIterator = powerUps.iterator();
+        while (powerUpIterator.hasNext()) {
+            PowerUp pu = powerUpIterator.next();
+            pu.update(mapWidthPixels, mapHeightPixels, tileMap);
+
+            // Controlla collisione con Mario
+            if (!pu.isCollected() && mario.getBounds().intersects(pu.getBounds())) {
+                pu.applyEffect(mario);
+                pu.setCollected(true);
+            }
+
+            // Rimuovi power-up raccolto
+            if (pu.isCollected()) {
+                powerUpIterator.remove();
+            }
+        }
+        
+        /*
+        // controlla blocchi e recupera eventuali oggetti generati
+        List<GameObject> spawned = collisionManager.checkPlayerBlockCollisions(mario, blocks);
+        for (GameObject obj : spawned) {
+            if (obj instanceof Coin) {
+                coins.add((Coin) obj);
+            } else {
+                items.add(obj); // es. Mushroom, FireFlower...
+            }
+        }
+
+        // --- Update monete esistenti ---
+        Iterator<Coin> coinIterator = coins.iterator();
+        while (coinIterator.hasNext()) {
+            Coin coin = coinIterator.next();
+            coin.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
+
+            // opzionale: se la moneta è "scomparsa" (animazione finita), rimuovila
+            if (coin.isCollected() || coin.shouldDespawn()) {
+                coinIterator.remove();
+            }
+        }
+
+        // --- Update oggetti spawnati (funghi, fiori, ecc.) ---
+        Iterator<GameObject> itemIterator = items.iterator();
+        while (itemIterator.hasNext()) {
+            GameObject item = itemIterator.next();
+            item.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
+
+            // opzionale: se raccolto, rimuovi
+            if (item instanceof Collectible && ((Collectible) item).isCollected()) {
+                itemIterator.remove();
+            }
+        }
+
+        // --- Update blocchi (per il bounce ecc.) ---
+        for (Block block : blocks) {
+            block.update(mapWidthPixels, mapHeightPixels, tileMap);
+        }*/
+        
+    
+
+        // --- LOGICA DI CAMERA ---
+        cameraX = mario.getX() - WINDOW_WIDTH / 2;
+        cameraY = mario.getY() - WINDOW_HEIGHT / 2;
+        clampCamera();
     }
+
+    
 	
     private void clampCamera() {
         int mapWidthPixels = tileMap.getCols() * TileMap.TILE_SIZE;
         int mapHeightPixels = tileMap.getRows() * TileMap.TILE_SIZE;
         
-        int desiredCameraX = mario.getX() - GameFrame.WINDOW_WIDTH/2;
+        //Centro camera su Mario
+        int desiredCameraX = mario.getX() - WINDOW_WIDTH/2; 
         int minCameraX = 0;
-        int maxCameraX = mapWidthPixels - GameFrame.WINDOW_WIDTH;
+        int maxCameraX = mapWidthPixels - WINDOW_WIDTH;
         
         // Limita orizzontalmente
         // Se la mappa è più piccola della finestra, centrala
         if (mapWidthPixels < GameFrame.WINDOW_WIDTH) {
             cameraX = maxCameraX / 2;
         } else { // Altrimenti, blocca ai bordi della mappa
-            cameraX = Math.max(minCameraX, Math.min(desiredCameraX, maxCameraX));
+            cameraX = Math.max(minCameraX, Math.min(desiredCameraX, Math.max(0, maxCameraX)));
         }
         
         

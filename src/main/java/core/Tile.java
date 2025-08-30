@@ -15,7 +15,7 @@ public class Tile {
     
     private boolean determinateSolidState(int tileId) {
         switch (tileId) {
-            //case 1: 
+            case 1: 
             case 2: 
             case 3:
             case 21: 
