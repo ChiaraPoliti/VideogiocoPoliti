@@ -10,9 +10,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-//import core.TileMap;
-//import core.Tile;
 import beans.Block;
 import beans.BreakableBlock;
 import beans.Coin;
@@ -25,10 +22,8 @@ import beans.Player;
 import beans.PowerUp;
 import beans.QuestionBlock;
 import logic.CollisionManager;
+import logic.Level1;
 import enums.GameState;
-//import beans.QuestionBlock;
-//import beans.Mushroom;
-//import enums.itemType;
 
 public class GamePanel extends JPanel implements Runnable,KeyListener {
 	private Thread gameThread;
@@ -48,13 +43,18 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
     private GameState gameState;
 	
 	public GamePanel() {
-		Player mario = new Player (100,112);
-		this.mario = mario;
-		this.enemies = new ArrayList<>();
-	    this.coins = new ArrayList<>();
+		this.mario = new Player (100,112);
+		//this.mario = mario;
+		//this.enemies = new ArrayList<>();
+	    //this.coins = new ArrayList<>();
 	    this.powerUps = new ArrayList<>();
-	    this.blocks = new ArrayList<>(); 
-	    this.gameState = GameState.PLAYING;
+	    //this.blocks = new ArrayList<>(); 
+	    //this.gameState = GameState.PLAYING;
+	    
+	    Level1 level1 = new Level1();
+        this.enemies = level1.getEnemies();
+        this.blocks = level1.getBlocks();
+        this.coins = level1.getCoins();
 		
 		List<String> mapLayersPaths = new ArrayList<>();
 		mapLayersPaths.add("/maps/marioTileset_background.csv"); 
@@ -63,19 +63,22 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         
         String tilesImagesPath = "/tiles/";
         this.tileMap = new TileMap(mapLayersPaths, tilesImagesPath);
-        System.out.println("--- DEBUG MAP DIMENSIONS ---");
-        System.out.println("Mappa Caricata - Colonne: " + tileMap.getCols());
-        System.out.println("Mappa Caricata - Righe: " + tileMap.getRows());
-        System.out.println("Mappa Caricata - Larghezza in Pixels: " + (tileMap.getCols() * TileMap.TILE_SIZE));
-        System.out.println("--- FINE DEBUG ---");
+        //System.out.println("--- DEBUG MAP DIMENSIONS ---");
+        //System.out.println("Mappa Caricata - Colonne: " + tileMap.getCols());
+        //System.out.println("Mappa Caricata - Righe: " + tileMap.getRows());
+        //System.out.println("Mappa Caricata - Larghezza in Pixels: " + (tileMap.getCols() * TileMap.TILE_SIZE));
+        //System.out.println("--- FINE DEBUG ---");
 		
+        //camera
         cameraX = mario.getX()-this.WINDOW_WIDTH/2;
         cameraY = mario.getY() - this.WINDOW_HEIGHT/2;
         clampCamera();
         
         this.collisionManager = new CollisionManager();
+        this.gameState = GameState.PLAYING;
+
         
-        // Aggiungi nemici
+        /*// Aggiungi nemici
         enemies.add(new Goomba(250, 128));
         enemies.add(new Goomba(550, 128));
         enemies.add(new Goomba(1050, 128));
@@ -84,6 +87,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         
         // Aggiungi una moneta
         coins.add(new Coin(400, 128));
+        //coins.add(new Coin ())
         coins.add(new Coin (896, 64));
         coins.add(new Coin (912,64));
         coins.add(new Coin (928,64));
@@ -91,6 +95,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         //Aggiungo blocchi
         blocks.add(new BreakableBlock (176,80));
         blocks.add(new BreakableBlock (544,80));
+        blocks.add(new BreakableBlock (224,80));
         blocks.add(new BreakableBlock (896,80));
         blocks.add(new BreakableBlock (912,80));
         blocks.add(new BreakableBlock (928,80));
@@ -100,7 +105,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         blocks.add(new QuestionBlock (912,32, enums.itemType.MUSHROOM));
         
         blocks.add(new QuestionBlock (528, 80, enums.itemType.COIN));
-        blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN));
+        blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN));*/
         
         
         setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
@@ -177,51 +182,6 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         }
     }
 
-    /*private void update() {
-    	int mapWidthPixels = tileMap.getCols() * TileMap.TILE_SIZE;
-    	int mapHeightPixels = tileMap.getRows() * TileMap.TILE_SIZE;
-
-    	mario.update(mapWidthPixels, mapHeightPixels, tileMap);
-        //mario.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
-        
-        // Rimuovi i nemici morti usando un Iterator per evitare problemi di concorrenza
-        Iterator<Enemy> enemyIterator = enemies.iterator();
-        while (enemyIterator.hasNext()) {
-            Enemy enemy = enemyIterator.next();
-            enemy.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
-            if (!enemy.isAlive() && enemy.isRemovable()) {
-                enemyIterator.remove();
-            }
-        }
-        
-        collisionManager.checkAllCollisions(mario, enemies, blocks, tileMap);
-        
-        for (int j = 0; j < coins.size(); j++) {
-            Coin coin = coins.get(j);
-            coin.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
-            // Gestisci la rimozione delle monete raccolte
-        }
-        
-        for (Block block : blocks) {
-            block.update(0,0, tileMap);// Passa i parametri necessari
-            //block.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
-        }
-            
-        
-     // --- LOGICA DI AGGIORNAMENTO DELLA CAMERA ---
-        // La camera segue Mario, ma non va oltre i bordi della mappa
-        
-        // Calcola la posizione desiderata della camera basata su Mario
-        // Centra Mario nella finestra se possibile
-        cameraX = mario.getX() - WINDOW_WIDTH / 2;
-        cameraY = mario.getY() - WINDOW_HEIGHT / 2;
-
-        // Limita la camera ai bordi della mappa (orizzontale)
-        clampCamera();
-        // devo mettere aggiornamenti di tutti
-        //devo mettere le collisioni (rimandi ai metodi della classe giusta)
-        collisionManager.checkAllCollisions(mario, enemies, blocks, tileMap);
-    }*/
     
     private void update() {
     	if (gameState == GameState.GAME_OVER || gameState == GameState.WIN) {
@@ -233,15 +193,17 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
 
         //Update Player
         mario.update(mapWidthPixels, mapHeightPixels, tileMap);
+        
+        //verifica tile vittoria
         int marioCol = (mario.getX() + mario.getWidth() / 2) / TileMap.TILE_SIZE;
         int marioRow = (mario.getY() + mario.getHeight() / 2) / TileMap.TILE_SIZE;
-
         Tile currentTile = tileMap.getTile(1, marioRow, marioCol); // layer 0 o quello giusto
 
         if (currentTile != null && currentTile.getId() == 22) {
             gameState = GameState.WIN;
         }
 
+        
         // Update Nemici e rimozione morti
         Iterator<Enemy> enemyIterator = enemies.iterator();
         while (enemyIterator.hasNext()) {
@@ -255,7 +217,6 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         // collisioni nemici e mappa
         collisionManager.checkPlayerTileCollisions(mario, tileMap);
         collisionManager.checkPlayerEnemyCollisions(mario, enemies);
-        //collisionManager.checkEnemyTileCollisions(enemies, tileMap);
         
         
         //update blocchi
@@ -277,6 +238,10 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
                 coinIterator.remove();
             }
         }
+        
+        collisionManager.checkPlayerCoinCollisions(mario, coins);
+        
+        
         
         //update powerup esistenti
         Iterator<PowerUp> powerUpIterator = powerUps.iterator();
@@ -313,12 +278,18 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
     
     private void restartGame() {
         mario = new Player(100,112);
-        enemies.clear();
-        coins.clear();
+       // enemies.clear();
+        //coins.clear();
+        //powerUps.clear();
+        //blocks.clear();
+        
+        Level1 level1 = new Level1();
+        enemies = level1.getEnemies();
+        blocks = level1.getBlocks();
+        coins = level1.getCoins();
         powerUps.clear();
-        blocks.clear();
 
-     // Aggiungi nemici
+     /* Aggiungi nemici
         enemies.add(new Goomba(250, 128));
         enemies.add(new Goomba(550, 128));
         enemies.add(new Goomba(1050, 128));
@@ -337,13 +308,14 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         blocks.add(new BreakableBlock (896,80));
         blocks.add(new BreakableBlock (912,80));
         blocks.add(new BreakableBlock (928,80));
+        blocks.add(new BreakableBlock (224,80));
         
         
         blocks.add(new QuestionBlock (192,80, enums.itemType.MUSHROOM));
         blocks.add(new QuestionBlock (912,32, enums.itemType.MUSHROOM));
         
         blocks.add(new QuestionBlock (528, 80, enums.itemType.COIN));
-        blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN));
+        blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN))*/
 
         gameState = GameState.PLAYING;
         

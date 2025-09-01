@@ -114,35 +114,63 @@ public class CollisionManager {
      */
     
     public void checkPlayerBlockCollisions(Player mario, List<Block> blocks, List<Coin> coins, List<PowerUp> powerUps) {
-    		for (Block block : blocks) {
-    			if (block.isHit()) {
-    				continue;
-    			}
-    			
-    			Rectangle headBox = mario.getHeadBox();
-    			Rectangle triggerBox = block.getTriggerBox();
-    		    
-    			if (headBox.intersects(triggerBox)) {
-    				 Rectangle intersection = headBox.intersection(triggerBox); 
-    				boolean hittingFromBelow = mario.getVel_y() < 0;
-    				if (hittingFromBelow) {
-    					GameObject spawned = block.hit();
-    					System.out.println("Blocco colpito" + intersection);
-    					if (spawned != null) {
-    						if (spawned instanceof Coin) {
-    							coins.add((Coin) spawned);
-    						} else if (spawned instanceof PowerUp){
-    							powerUps.add((PowerUp) spawned);
-    						}
-    					}
+    	//boolean onAnyBlock = false;
+    	for (Block block : blocks) {
+			/*if (block.isHit()) {
+				continue;
+			}*/
+			
+			Rectangle headBox = mario.getHeadBox();
+			Rectangle triggerBox = block.getTriggerBox();
+			//Rectangle blockBounds = block.getBounds();
+		    
+			//collisione da sotto
+			if (headBox.intersects(triggerBox)) {
+				//Rectangle intersection = headBox.intersection(triggerBox); 
+				boolean hittingFromBelow = mario.getVel_y() < 0;
+				if (hittingFromBelow) {
+					GameObject spawned = block.hit();
+					//System.out.println("Blocco colpito" + intersection);
+					if (spawned != null) {
+						if (spawned instanceof Coin) {
+							coins.add((Coin) spawned);
+						} else if (spawned instanceof PowerUp){
+							powerUps.add((PowerUp) spawned);
+						}
+					}
 
-    					mario.setVel_y(0);
-    					mario.setY(block.getY() + block.getHeight());
-    				}
-    			}
-    		}
+					mario.setVel_y(0);
+					mario.setY(block.getY() + block.getHeight());
+					//
+					continue;
+				}
+			}
+			//collisione da sopra (gravità - piattaforma)
+			Rectangle feetBox = new Rectangle(mario.getX(), mario.getY() + mario.getHeight() - 2, mario.getWidth(), 2);
+		    Rectangle blockTop = new Rectangle(block.getX(), block.getY(), block.getWidth(), 2);
+
+			
+	        //if (feetBox.intersects(blockBounds) && mario.getVel_y() >= 0) {
+	        if (feetBox.intersects(blockTop) && mario.getVel_y() >= 0) {
+	            mario.setVel_y(0);
+	            mario.setY(block.getY() - mario.getHeight());
+	            mario.setOnGround(true);
+	            mario.setJumping(false);
+	            //onAnyBlock = true;
+	        }
+			
+		}
     }
-
-
-
+    	
+	public void checkPlayerCoinCollisions(Player mario, List<Coin> coins){
+		for (Coin coin : coins) {
+			if (!coin.isCollected() && mario.getBounds().intersects(coin.getBounds())) {
+				coin.collect();
+				mario.setScore(mario.getScore()+coin.getValue());
+			}
+		}
+	
+	}
 }
+
+	

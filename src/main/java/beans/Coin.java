@@ -2,6 +2,8 @@ package beans;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
+
 import javax.swing.ImageIcon;
 
 import core.TileMap;
@@ -55,7 +57,6 @@ public class Coin extends GameObject {
 
 	@Override
 	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
-		// If the power-up is collected or not alive, stop updating it.
 		if (this.isCollected) {
 			return;
 		}
@@ -84,6 +85,10 @@ public class Coin extends GameObject {
 				g.fillRect(screenX, screenY, this.width, this.height);
 			}
 		}
+	}
+	
+	public Rectangle getBounds() {
+	    return new Rectangle(x, y, width, height);
 	}
 
 	/**

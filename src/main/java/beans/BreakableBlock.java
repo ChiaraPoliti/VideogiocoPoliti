@@ -10,7 +10,7 @@ import core.TileMap;
 import enums.blockType;
 
 public class BreakableBlock extends Block {
-	//protected boolean isRemovable;
+	protected boolean isRemovable;
 	private Image emptyBlock;
 	
 	public BreakableBlock(int x, int y) {
@@ -46,7 +46,7 @@ public class BreakableBlock extends Block {
 		if(!this.isHit) {
 			this.isHit = true;
 			System.out.println("Blocco rotto!");
-			//this.isRemovable = true;
+			this.isRemovable = true;
 		}
 		return null;
 	}
@@ -91,7 +91,8 @@ public class BreakableBlock extends Block {
 			if(currentImage != null) {
 				g.drawImage(currentImage, screenX, screenY, this.width, this.height, null);
 			}else {
-				g.setColor(java.awt.Color.BLACK);
+				//g.setColor(java.awt.Color.CYAN);
+				g.setColor(new Color (140,140,230));
 				g.fillRect(screenX, screenY, this.width, this.height);
 			}
 		//}
