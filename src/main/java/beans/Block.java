@@ -9,14 +9,20 @@ import enums.blockType;
 public abstract class Block extends GameObject {
 	protected blockType type;
 	protected boolean isHit;
+	//protected int bounceVelY;
+	//protected int originalY;
 	
 	public static final int BLOCK_SIZE = 16;
+	protected static final int BOUNCE_HEIGHT = 10; 
+    protected static final int BOUNCE_SPEED = 2;
 	
 	
 	public Block (int x, int y, blockType type) {
 		super (x, y, BLOCK_SIZE, BLOCK_SIZE, null);
 		this.type = type;
 		this.isHit = false;	
+		//this.bounceVelY = 0;
+		//this.originalY = y;
 	}
 	
 	/*public Rectangle getHitBox() {
@@ -32,6 +38,7 @@ public abstract class Block extends GameObject {
 	
 	public Rectangle getTriggerBox() {
 	    return new Rectangle(this.x-1, this.y + this.height - 13, this.width, 32);
+		//return new Rectangle(this.x, this.y + this.height, this.width, 5);
 	}
 
 	

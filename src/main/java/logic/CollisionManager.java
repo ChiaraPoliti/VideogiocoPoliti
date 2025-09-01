@@ -61,32 +61,6 @@ public class CollisionManager {
         	mario.setVel_y(0);
         }
    }
-    
-   /* public void checkEnemyTileCollisions(List<Enemy> enemies, TileMap tileMap) {
-        for (Enemy enemy : enemies) {
-            if (!enemy.isAlive()) continue;
-
-            // Coordinate davanti al nemico
-            int frontX = enemy.isMovingRight () ? enemy.getX() + enemy.getWidth() + 1 : enemy.getX() - 1;
-            int footY = enemy.getY() + enemy.getHeight();
-            
-            int frontCol = frontX / TileMap.TILE_SIZE;
-            int footRow = footY / TileMap.TILE_SIZE;
-
-            // Controllo muro davanti
-            boolean wallAhead = tileMap.isTileSolid(frontCol, enemy.getY() / TileMap.TILE_SIZE) ||
-                                tileMap.isTileSolid(frontCol, (enemy.getY() + enemy.getHeight() - 1) / TileMap.TILE_SIZE);
-
-            // Controllo buco davanti
-            boolean groundAhead = tileMap.isTileSolid(frontCol, footRow);
-
-            if (wallAhead || !groundAhead) {
-                enemy.setMovingRight(!enemy.isMovingRight()); // inverti direzione
-                enemy.setMovingLeft(!enemy.isMovingLeft());
-            }
-        }
-    }*/
-
 
     
     /**
@@ -138,33 +112,6 @@ public class CollisionManager {
     /**
      * Gestisce le collisioni tra Mario e i blocchi speciali (rompibili, domanda, ecc).
      */
-    /*public void checkPlayerBlockCollisions(Player mario, List<Block> blocks) {
-        for (Block block : blocks) {
-            if (block.isHit()) continue; // se già rotto o vuoto, ignora
-
-            if (mario.getBounds().intersects(block.getBounds())) {
-                
-                // Mario colpisce dal basso
-                boolean hittingFromBelow = 
-                    mario.getVel_y() < 0 && mario.getY() > block.getY();
-
-                if (hittingFromBelow) {
-                	block.hit();
-                    /*if (block.getType () == blockType.BREAKABLE) {
-                        block.hit();  // lo segni come distrutto
-                    } else if (block.getType() == blockType.QUESTION) {
-                        block.activate();    // rilascia item / moneta
-                    }*/
-
-                    // stoppa salto e sistema posizione
-                  //.setVel_y(0);
-                  //  mario.setY(block.getY() + block.getHeight());
-              //  }
-
-                // se serve puoi gestire anche collisioni sopra/lato
-           // }
-        //}
-  //  } */
     
     public void checkPlayerBlockCollisions(Player mario, List<Block> blocks, List<Coin> coins, List<PowerUp> powerUps) {
     		for (Block block : blocks) {
@@ -172,36 +119,11 @@ public class CollisionManager {
     				continue;
     			}
     			
-    			/*int headHeight = 6; 
-    	        Rectangle playerHead = new Rectangle(
-    	            mario.getX(),
-    	            mario.getY(),
-    	            mario.getWidth(),
-    	            headHeight
-    	        );*/
     			Rectangle headBox = mario.getHeadBox();
-    			
-
-    	        // Hitbox inferiore del blocco: solo bordo inferiore
-    	        /*Rectangle blockBottom = new Rectangle(
-    	            block.getX(),
-    	            block.getY() + block.getHeight() - 2, 
-    	            block.getWidth(),
-    	            2
-    	        );*/
-    			
     			Rectangle triggerBox = block.getTriggerBox();
-    	        
-    			//int hitBoxWidth = mario.getWidth() + 4; // 2px padding a sinistra e destra
-    		    //int hitBoxHeight = 6; // altezza della zona di colpo sotto i piedi
-    		    //int hitBoxX = mario.getX() + 2; // padding sinistra
-    		    //int hitBoxY = mario.getY() + mario.getHeight() + 1; // appena sotto il player
-    		    //Rectangle hitBox = new Rectangle(hitBoxX, hitBoxY, hitBoxWidth, hitBoxHeight);
     		    
     			if (headBox.intersects(triggerBox)) {
     				 Rectangle intersection = headBox.intersection(triggerBox); 
-    				//boolean hittingFromBelow = mario.getVel_y() < 0 && mario.getY() > block.getY();
-    				// hittingFromBelow = mario.getVel_y() < 0 && mario.getY() + mario.getHeight() <= block.getY() + 5;
     				boolean hittingFromBelow = mario.getVel_y() < 0;
     				if (hittingFromBelow) {
     					GameObject spawned = block.hit();

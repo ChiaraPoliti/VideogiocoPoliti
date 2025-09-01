@@ -212,7 +212,12 @@ public class Player extends MovableGameObject {
 	}
 	
 	public Rectangle getHeadBox() {
-	    return new Rectangle(this.x, this.y, this.width, 13); // metà superiore del player
+		if(!this.isBig) {
+			 return new Rectangle(this.x, this.y, this.width, 13); // metà superiore del player
+		} else {
+			return new Rectangle(this.x, this.y, this.width, 10);
+		}
+	   
 	}
 
 

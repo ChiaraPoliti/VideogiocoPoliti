@@ -19,16 +19,17 @@ public class QuestionBlock extends Block {
 	private Image emptyBlock;
 	private itemType contentItemType;
 	private boolean isContentReleased;
+	private int bounceVelY; 
 	
 	private static final int BOUNCE_HEIGHT = 10; 
     private static final int BOUNCE_SPEED = 2; 
-    private double bounceVelY = 0; 
 	
 	public QuestionBlock(int x, int y, itemType contentItemType) {
 		super(x,y, blockType.QUESTION);
 		this.contentItemType = contentItemType;
 		this.isContentReleased = false;
 		this.originalY = y;
+		this.bounceVelY = 0;
 		
 		try {
 			java.net.URL imageUrl = getClass().getResource("/tiles/tile_2.png");
@@ -61,7 +62,6 @@ public class QuestionBlock extends Block {
 		if(!this.isContentReleased) {
 			super.setHit(true);
 			this.isContentReleased = true;
-			//this.image = this.emptyBlock;
 			System.out.println("Blocco vuoto.");
 			//this.releasePowerUp();
 			
@@ -235,7 +235,7 @@ public class QuestionBlock extends Block {
 	/**
 	 * @param bounceVelY the bounceVelY to set
 	 */
-	public void setBounceVelY(double bounceVelY) {
+	public void setBounceVelY(int bounceVelY) {
 		this.bounceVelY = bounceVelY;
 	}
 

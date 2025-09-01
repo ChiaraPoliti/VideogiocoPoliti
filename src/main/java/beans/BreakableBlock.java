@@ -1,6 +1,8 @@
 package beans;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 
 import javax.swing.ImageIcon;
 
@@ -8,7 +10,8 @@ import core.TileMap;
 import enums.blockType;
 
 public class BreakableBlock extends Block {
-	protected boolean isRemovable;
+	//protected boolean isRemovable;
+	private Image emptyBlock;
 	
 	public BreakableBlock(int x, int y) {
 		super(x,y, blockType.BREAKABLE );
@@ -22,10 +25,19 @@ public class BreakableBlock extends Block {
 	            System.err.println("ERRORE: Immagine di blocco non trovata nel classpath: /tiles/tile_1.png");
 	            this.image = null;
 	        }
+	     // Caricamento dell'immagine vuota (se esiste)
+	        java.net.URL emptyBlockUrl = getClass().getResource("/tiles/tile_3.png"); 
+            if (emptyBlockUrl != null) {
+                this.emptyBlock = new ImageIcon(emptyBlockUrl).getImage(); 
+            } else {
+                System.err.println("ERRORE: Immagine blocco vuoto non trovata: /tiles/tile_3.png");
+                this.emptyBlock = null;
+            }
 	    } catch (Exception e) {
 	        System.err.println("Eccezione durante il caricamento dell'immagine di blocco: " + e.getMessage());
 	        e.printStackTrace();
 	        this.image = null;
+	        this.emptyBlock = null;
 	    }
 	}
 
@@ -34,7 +46,7 @@ public class BreakableBlock extends Block {
 		if(!this.isHit) {
 			this.isHit = true;
 			System.out.println("Blocco rotto!");
-			this.isRemovable = true;
+			//this.isRemovable = true;
 		}
 		return null;
 	}
@@ -42,22 +54,47 @@ public class BreakableBlock extends Block {
 	
 	@Override
 	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
-    }
+	}
+	/*@Override
+	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
+	    if (bounceVelY != 0) {
+	        this.y += bounceVelY;
+	        if (bounceVelY < 0) {
+	            if (this.y <= originalY - BOUNCE_HEIGHT) {
+	                this.y = originalY - BOUNCE_HEIGHT;
+	                bounceVelY = BOUNCE_SPEED;
+	            }
+	        } else {
+	            if (this.y >= originalY) {
+	                this.y = originalY;
+	                bounceVelY = 0;
+	            }
+	        }
+	    }
+	}*/
+
 	
 	
 	@Override
 	public void draw(Graphics2D g, int cameraX, int cameraY) {
 		int screenX = this.x - cameraX;
 		int screenY = this.y - cameraY;
+		Image currentImage = null;
 		
-		if (!this.isHit) {
-			if(this.image != null) {
-				g.drawImage(image, screenX, screenY, this.width, this.height, null);
+		if (this.isHit) {
+			currentImage = this.emptyBlock;
+		} else {
+			currentImage = this.image;
+		} 
+		
+		//if (!this.isHit) {
+			if(currentImage != null) {
+				g.drawImage(currentImage, screenX, screenY, this.width, this.height, null);
 			}else {
 				g.setColor(java.awt.Color.BLACK);
-				g.fillRect(this.x, this.y, this.width, this.height);
+				g.fillRect(screenX, screenY, this.width, this.height);
 			}
-		}
+		//}
 	}
 
 }

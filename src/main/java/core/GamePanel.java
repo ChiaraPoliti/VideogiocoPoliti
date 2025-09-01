@@ -76,26 +76,31 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         this.collisionManager = new CollisionManager();
         
         // Aggiungi nemici
-        enemies.add(new Goomba(250, 112));
-        enemies.add(new Goomba(550, 112));
-        //enemies.add(new Goomba(1018, 112));
+        enemies.add(new Goomba(250, 128));
+        enemies.add(new Goomba(550, 128));
+        enemies.add(new Goomba(1050, 128));
         enemies.add(new Koopa(1018, 112));
         
         
         // Aggiungi una moneta
-        coins.add(new Coin(400, 112));
-        //coins.add(new Coin ());
-        //coins.add(new Coin ());
-        //coins.add(new Coin ());
-        
-        //Aggiungo Power Up
-        //Mushroom pu1 = new Mushroom (193,80);
-        //powerUps.add(pu1);
+        coins.add(new Coin(400, 128));
+        coins.add(new Coin (896, 64));
+        coins.add(new Coin (912,64));
+        coins.add(new Coin (928,64));
         
         //Aggiungo blocchi
-        blocks.add(new BreakableBlock (192,80));
-        //blocks.add(new QuestionBlock (193,80, pu1.getType()));
-        blocks.add(new QuestionBlock (193,80, enums.itemType.MUSHROOM));
+        blocks.add(new BreakableBlock (176,80));
+        blocks.add(new BreakableBlock (544,80));
+        blocks.add(new BreakableBlock (896,80));
+        blocks.add(new BreakableBlock (912,80));
+        blocks.add(new BreakableBlock (928,80));
+        
+        
+        blocks.add(new QuestionBlock (192,80, enums.itemType.MUSHROOM));
+        blocks.add(new QuestionBlock (912,32, enums.itemType.MUSHROOM));
+        
+        blocks.add(new QuestionBlock (528, 80, enums.itemType.COIN));
+        blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN));
         
         
         setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
@@ -260,6 +265,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         
         //collioni mario e blocchi
         collisionManager.checkPlayerBlockCollisions(mario, blocks, coins, powerUps);
+        //repaint();
         
         //update monete
         Iterator<Coin> coinIterator = coins.iterator();
@@ -296,54 +302,13 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         	repaint();
         }
         
-        /*
-        // controlla blocchi e recupera eventuali oggetti generati
-        List<GameObject> spawned = collisionManager.checkPlayerBlockCollisions(mario, blocks);
-        for (GameObject obj : spawned) {
-            if (obj instanceof Coin) {
-                coins.add((Coin) obj);
-            } else {
-                items.add(obj); // es. Mushroom, FireFlower...
-            }
-        }
-
-        // --- Update monete esistenti ---
-        Iterator<Coin> coinIterator = coins.iterator();
-        while (coinIterator.hasNext()) {
-            Coin coin = coinIterator.next();
-            coin.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
-
-            // opzionale: se la moneta è "scomparsa" (animazione finita), rimuovila
-            if (coin.isCollected() || coin.shouldDespawn()) {
-                coinIterator.remove();
-            }
-        }
-
-        // --- Update oggetti spawnati (funghi, fiori, ecc.) ---
-        Iterator<GameObject> itemIterator = items.iterator();
-        while (itemIterator.hasNext()) {
-            GameObject item = itemIterator.next();
-            item.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
-
-            // opzionale: se raccolto, rimuovi
-            if (item instanceof Collectible && ((Collectible) item).isCollected()) {
-                itemIterator.remove();
-            }
-        }
-
-        // --- Update blocchi (per il bounce ecc.) ---
-        for (Block block : blocks) {
-            block.update(mapWidthPixels, mapHeightPixels, tileMap);
-        }*/
-        
-    
-
         // --- LOGICA DI CAMERA ---
         cameraX = mario.getX() - WINDOW_WIDTH / 2;
         cameraY = mario.getY() - WINDOW_HEIGHT / 2;
         clampCamera();
         
-        SwingUtilities.invokeLater(() -> this.repaint());
+        //SwingUtilities.invokeLater(() -> this.repaint());
+        repaint();
     }
     
     private void restartGame() {
@@ -353,16 +318,32 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         powerUps.clear();
         blocks.clear();
 
-        // ricrei la mappa e riaggiungi i nemici/oggetti come in costruttore
-        enemies.add(new Goomba(250, 112));
-        enemies.add(new Goomba(550, 112));
+     // Aggiungi nemici
+        enemies.add(new Goomba(250, 128));
+        enemies.add(new Goomba(550, 128));
+        enemies.add(new Goomba(1050, 128));
         enemies.add(new Koopa(1018, 112));
-
-        coins.add(new Coin(400, 112));
-        //Mushroom pu1 = new Mushroom(193,80);
-        //powerUps.add(pu1);
-        blocks.add(new BreakableBlock(192,80));
-        blocks.add(new QuestionBlock(193,80, enums.itemType.MUSHROOM));
+        
+        
+        // Aggiungi una moneta
+        coins.add(new Coin(400, 128));
+        coins.add(new Coin (896, 64));
+        coins.add(new Coin (912,64));
+        coins.add(new Coin (928,64));
+        
+        //Aggiungo blocchi
+        blocks.add(new BreakableBlock (176,80));
+        blocks.add(new BreakableBlock (544,80));
+        blocks.add(new BreakableBlock (896,80));
+        blocks.add(new BreakableBlock (912,80));
+        blocks.add(new BreakableBlock (928,80));
+        
+        
+        blocks.add(new QuestionBlock (192,80, enums.itemType.MUSHROOM));
+        blocks.add(new QuestionBlock (912,32, enums.itemType.MUSHROOM));
+        
+        blocks.add(new QuestionBlock (528, 80, enums.itemType.COIN));
+        blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN));
 
         gameState = GameState.PLAYING;
         
@@ -460,6 +441,13 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
                 }
             }
         }
+        
+        //blocchi
+        for (Block block : blocks) {
+        	block.draw(g2d, cameraX, cameraY);
+        }
+        
+        
 	    if(this.mario!= null) {
 	    	mario.draw(g2d, cameraX, cameraY);
 	    }
