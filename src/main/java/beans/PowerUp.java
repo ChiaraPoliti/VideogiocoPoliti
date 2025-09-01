@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import core.TileMap;
+import enums.itemType;
 
 /**
  * @author Chiara Politi
@@ -21,6 +22,7 @@ public abstract class PowerUp extends GameObject {
 	protected boolean isRising;
 	protected int initial_y;
 	protected boolean isCollected;
+	protected itemType type;
 	
 	public static final int POWER_UP_SIZE = 16;
 	public static final int RISE_SPEED = 2;
@@ -151,6 +153,24 @@ public abstract class PowerUp extends GameObject {
 	public void setCollected(boolean isCollected) {
 		this.isCollected = isCollected;
 	}
+
+
+	/**
+	 * @return the type
+	 */
+	public itemType getType() {
+		return type;
+	}
+
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(itemType type) {
+		this.type = type;
+	}
+	
+	
 	
 	
 }

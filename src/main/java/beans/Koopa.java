@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 
 import javax.swing.ImageIcon;
 
@@ -18,7 +19,7 @@ public class Koopa extends Enemy {
 	public static final int HEIGHT_KOOPA = 30;
 	public static final int WIDTH_SHELL = 4;
 	public static final int HEIGHT_SHELL = 4;
-    private static final long SHELL_DURATION = 50000;
+    private static final long SHELL_DURATION = 5000;
     public static final double KOOPA_DAMAGE = 0.5;
     
     public long shellStartTime = 0;
@@ -81,7 +82,71 @@ public class Koopa extends Enemy {
 	}
 	
 	
-	
+/*
+	@Override
+	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
+	    if (!isAlive && !isInShell) {
+	        // Koopa morto da caduta fuori mappa, non fare nulla
+	        return;
+	    }
+
+	    // --- Logica per uscire dallo shell dopo durata ---
+	    if (isInShell) {
+	        long currentTime = System.currentTimeMillis();
+	        if (currentTime - shellStartTime >= SHELL_DURATION) {
+	            toNormalSize();
+	        }
+	    }
+
+	    // --- Controllo collisione terreno/muri ---
+	    int footY = y + height;
+	    int frontX = isMovingRight ? x + width + 1 : x - 1;
+	    int frontCol = frontX / TileMap.TILE_SIZE;
+	    //int footRow = footY / TileMap.TILE_SIZE;
+
+	    boolean groundAhead = tileMap.isTileSolid(frontCol, (footY + 1) / TileMap.TILE_SIZE);
+	    boolean wallAhead = tileMap.isTileSolid(frontCol, y / TileMap.TILE_SIZE) || tileMap.isTileSolid(frontCol, (y + height / 2) / TileMap.TILE_SIZE);
+
+	    // Inversione direzione se muro o buco
+	    if (wallAhead || !groundAhead) {
+	        if (isMovingRight) { isMovingRight = false; isMovingLeft = true; }
+	        else { isMovingRight = true; isMovingLeft = false; }
+	    }
+
+	    // --- Movimento ---
+	    if (isInShell && vel_x != 0) {
+	        // Guscio calciato: muove con vel_x
+	        x += vel_x;
+	    } else if (!isInShell) {
+	        // Koopa normale
+	        vel_x = isMovingLeft ? -VEL_X : VEL_X;
+	        x += vel_x;
+	    }
+
+	    // --- Gravità ---
+	    if (!isOnGround) {
+	        vel_y += g;  // applica gravità
+	    }
+	    y += vel_y;
+
+	    // Check collisione con pavimento
+	    int bottomRow = (y + height) / TileMap.TILE_SIZE;
+	    if (tileMap.isTileSolid(x / TileMap.TILE_SIZE, bottomRow) ||
+	            tileMap.isTileSolid((x + width - 1) / TileMap.TILE_SIZE, bottomRow)) {
+	            y = bottomRow * TileMap.TILE_SIZE - height;
+	            vel_y = 0;
+	            isOnGround = true;
+	        } else {
+	            isOnGround = false;
+	        }
+
+	        // --- Caduta fuori mappa ---
+	        if (y > mapHeightPixels + 100) {
+	            die();
+	        }
+	    }*/
+
+
 	
 
 	@Override

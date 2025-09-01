@@ -99,12 +99,34 @@ public abstract class MovableGameObject extends GameObject {
     }
     
     // Aggiungi i getters e setters mancanti o modificati per usare i float
-    public float getVel_x() { return vel_x; }
-    public float getVel_y() { return vel_y; }
+    public int getVel_x() { return vel_x; }
+    public int getVel_y() { return vel_y; }
     public void setVel_x(int vel_x) { this.vel_x = vel_x; }
     public void setVel_y(int vel_y) { this.vel_y = vel_y; }
     public boolean isOnGround() { return isOnGround; }
-    public void setOnGround(boolean onGround) { this.isOnGround = onGround; }
+    
+    /**
+	 * @return the isMovingLeft
+	 */
+	public boolean isMovingLeft() {
+		return isMovingLeft;
+	}
+
+	/**
+	 * @return the isMovingRight
+	 */
+	public boolean isMovingRight() {
+		return isMovingRight;
+	}
+
+	/**
+	 * @return the g
+	 */
+	public static double getG() {
+		return g;
+	}
+
+	public void setOnGround(boolean onGround) { this.isOnGround = onGround; }
     public void setMovingLeft(boolean isMovingLeft) { this.isMovingLeft = isMovingLeft; }
     public void setMovingRight(boolean isMovingRight) { this.isMovingRight = isMovingRight; }
 }

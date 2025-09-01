@@ -59,8 +59,35 @@ public class CollisionManager {
         		//mario.setVel_y(0);
         	}
         	mario.setVel_y(0);
-    }
+        }
    }
+    
+   /* public void checkEnemyTileCollisions(List<Enemy> enemies, TileMap tileMap) {
+        for (Enemy enemy : enemies) {
+            if (!enemy.isAlive()) continue;
+
+            // Coordinate davanti al nemico
+            int frontX = enemy.isMovingRight () ? enemy.getX() + enemy.getWidth() + 1 : enemy.getX() - 1;
+            int footY = enemy.getY() + enemy.getHeight();
+            
+            int frontCol = frontX / TileMap.TILE_SIZE;
+            int footRow = footY / TileMap.TILE_SIZE;
+
+            // Controllo muro davanti
+            boolean wallAhead = tileMap.isTileSolid(frontCol, enemy.getY() / TileMap.TILE_SIZE) ||
+                                tileMap.isTileSolid(frontCol, (enemy.getY() + enemy.getHeight() - 1) / TileMap.TILE_SIZE);
+
+            // Controllo buco davanti
+            boolean groundAhead = tileMap.isTileSolid(frontCol, footRow);
+
+            if (wallAhead || !groundAhead) {
+                enemy.setMovingRight(!enemy.isMovingRight()); // inverti direzione
+                enemy.setMovingLeft(!enemy.isMovingLeft());
+            }
+        }
+    }*/
+
+
     
     /**
      * Controlla se un rettangolo si scontra con una piastrella solida.

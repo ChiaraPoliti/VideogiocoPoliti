@@ -210,6 +210,8 @@ public abstract class Enemy extends MovableGameObject {
 	public static int getVelX() {
 		return VEL_X;
 	}
+	
+	
 
 
 

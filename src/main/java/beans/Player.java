@@ -256,14 +256,14 @@ public class Player extends MovableGameObject {
 	/**
 	 * @return the vel_x
 	 */
-	public float getVel_x() {
+	public int getVel_x() {
 		return vel_x;
 	}
 
 	/**
 	 * @return the vel_y
 	 */
-	public float getVel_y() {
+	public int getVel_y() {
 		return vel_y;
 	}
 
