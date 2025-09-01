@@ -21,9 +21,9 @@ public class Player extends MovableGameObject {
 	
 	public static final int MAX_VEL_X = 3;
 	public static final int NORMAL_HEIGHT = 20;
-	public static final int NORMAL_WIDTH = 25;
+	public static final int NORMAL_WIDTH = 24;
 	public static final int BIG_HEIGHT = 30;
-	public static final int BIG_WIDTH = 35;
+	public static final int BIG_WIDTH = 32;
 	public static final int JUMP_VEL = -13;
 	
 	public Player(int x, int y) {
@@ -210,6 +210,11 @@ public class Player extends MovableGameObject {
 		}
 		
 	}
+	
+	public Rectangle getHeadBox() {
+	    return new Rectangle(this.x, this.y, this.width, 13); // metà superiore del player
+	}
+
 
 	/**
 	 * @return the isBig

@@ -14,12 +14,12 @@ public class BreakableBlock extends Block {
 		super(x,y, blockType.BREAKABLE );
 		
 		try {
-			java.net.URL imageUrl = getClass().getResource("/images/block.png");
+			java.net.URL imageUrl = getClass().getResource("/tiles/tile_1.png");
 	        if (imageUrl != null) {
 	        	this.image = new ImageIcon(imageUrl).getImage(); // Assegna all'immagine ereditata
 	            System.out.println("Immagine di blocco caricata con successo da: " + imageUrl);
 	        } else {
-	            System.err.println("ERRORE: Immagine di blocco non trovata nel classpath: /images/block.png");
+	            System.err.println("ERRORE: Immagine di blocco non trovata nel classpath: /tiles/tile_1.png");
 	            this.image = null;
 	        }
 	    } catch (Exception e) {

@@ -7,6 +7,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import javax.swing.ImageIcon;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import core.TileMap;
 
@@ -59,11 +61,12 @@ public class QuestionBlock extends Block {
 		if(!this.isContentReleased) {
 			super.setHit(true);
 			this.isContentReleased = true;
-			this.image = this.emptyBlock;
+			//this.image = this.emptyBlock;
 			System.out.println("Blocco vuoto.");
 			//this.releasePowerUp();
 			
 			this.bounceVelY = -BOUNCE_SPEED;
+			
 			return createItem();
 		} else {
 			if (this.image == this.emptyBlock) {
@@ -73,10 +76,13 @@ public class QuestionBlock extends Block {
 			return null;
 		}
 	}
+
 	
 	private GameObject createItem() {
 		int itemX = this.x;
+		//int itemX = this.x + (this.width/2) - (GameObject.getWidth() / 2);
         int itemY = this.y - Block.BLOCK_SIZE;
+		//int itemY = this.y - GameObject.getHeight();
         
         switch (contentItemType) {
         case COIN:

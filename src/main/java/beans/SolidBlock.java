@@ -12,12 +12,12 @@ public class SolidBlock extends Block {
 		super(x,y, blockType.SOLID);
 			
 		try {
-			java.net.URL imageUrl = getClass().getResource("/images/emptyBlock.png");
+			java.net.URL imageUrl = getClass().getResource("/tiles/tile_3.png");
 	        if (imageUrl != null) {
 	        	this.image = new ImageIcon(imageUrl).getImage(); // Assegna all'immagine ereditata
 	            System.out.println("Immagine di blocco solido caricata con successo da: " + imageUrl);
 	        } else {
-	            System.err.println("ERRORE: Immagine di blocco solido non trovata nel classpath: /images/emptyBlock.png");
+	            System.err.println("ERRORE: Immagine di blocco solido non trovata nel classpath: /tiles/tile_3.png");
 	            this.image = null;
 	        }
 	    } catch (Exception e) {

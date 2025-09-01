@@ -171,11 +171,41 @@ public class CollisionManager {
     			if (block.isHit()) {
     				continue;
     			}
-    			if (mario.getBounds().intersects(block.getBounds())) {
-    				boolean hittingFromBelow = mario.getVel_y() < 0 && mario.getY() > block.getY();
-    				
+    			
+    			/*int headHeight = 6; 
+    	        Rectangle playerHead = new Rectangle(
+    	            mario.getX(),
+    	            mario.getY(),
+    	            mario.getWidth(),
+    	            headHeight
+    	        );*/
+    			Rectangle headBox = mario.getHeadBox();
+    			
+
+    	        // Hitbox inferiore del blocco: solo bordo inferiore
+    	        /*Rectangle blockBottom = new Rectangle(
+    	            block.getX(),
+    	            block.getY() + block.getHeight() - 2, 
+    	            block.getWidth(),
+    	            2
+    	        );*/
+    			
+    			Rectangle triggerBox = block.getTriggerBox();
+    	        
+    			//int hitBoxWidth = mario.getWidth() + 4; // 2px padding a sinistra e destra
+    		    //int hitBoxHeight = 6; // altezza della zona di colpo sotto i piedi
+    		    //int hitBoxX = mario.getX() + 2; // padding sinistra
+    		    //int hitBoxY = mario.getY() + mario.getHeight() + 1; // appena sotto il player
+    		    //Rectangle hitBox = new Rectangle(hitBoxX, hitBoxY, hitBoxWidth, hitBoxHeight);
+    		    
+    			if (headBox.intersects(triggerBox)) {
+    				 Rectangle intersection = headBox.intersection(triggerBox); 
+    				//boolean hittingFromBelow = mario.getVel_y() < 0 && mario.getY() > block.getY();
+    				// hittingFromBelow = mario.getVel_y() < 0 && mario.getY() + mario.getHeight() <= block.getY() + 5;
+    				boolean hittingFromBelow = mario.getVel_y() < 0;
     				if (hittingFromBelow) {
     					GameObject spawned = block.hit();
+    					System.out.println("Blocco colpito" + intersection);
     					if (spawned != null) {
     						if (spawned instanceof Coin) {
     							coins.add((Coin) spawned);

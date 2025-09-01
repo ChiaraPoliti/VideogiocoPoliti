@@ -24,6 +24,7 @@ public abstract class PowerUp extends GameObject {
 	protected boolean isCollected;
 	protected itemType type;
 	
+	
 	public static final int POWER_UP_SIZE = 16;
 	public static final int RISE_SPEED = 2;
 	public static final int RISE_HEIGHT = 16;

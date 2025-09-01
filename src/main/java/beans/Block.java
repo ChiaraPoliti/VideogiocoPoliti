@@ -1,5 +1,9 @@
 package beans;
 
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+
+import core.TileMap;
 import enums.blockType;
 
 public abstract class Block extends GameObject {
@@ -15,7 +19,25 @@ public abstract class Block extends GameObject {
 		this.isHit = false;	
 	}
 	
+	/*public Rectangle getHitBox() {
+	    int extraWidth = 14;  // allarga 2 pixel per lato
+	    int extraHeight = 10; // allunga un po' verso l'alto
+	    return new Rectangle(
+	        this.x - extraWidth / 2,
+	        this.y - extraHeight,
+	        this.width + extraWidth,
+	        this.height + extraHeight
+	    );
+	}*/
+	
+	public Rectangle getTriggerBox() {
+	    return new Rectangle(this.x-1, this.y + this.height - 13, this.width, 32);
+	}
+
+	
 	public abstract GameObject hit();
+	public abstract void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap);
+	public abstract void draw (Graphics2D g, int cameraX, int cameraY);
 
 	/**
 	 * @return the x

@@ -78,8 +78,8 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         // Aggiungi nemici
         enemies.add(new Goomba(250, 112));
         enemies.add(new Goomba(550, 112));
-        enemies.add(new Goomba(1018, 112));
-        //enemies.add(new Koopa(1018, 112));
+        //enemies.add(new Goomba(1018, 112));
+        enemies.add(new Koopa(1018, 112));
         
         
         // Aggiungi una moneta
@@ -89,12 +89,13 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         //coins.add(new Coin ());
         
         //Aggiungo Power Up
-        Mushroom pu1 = new Mushroom (193,80);
-        powerUps.add(pu1);
+        //Mushroom pu1 = new Mushroom (193,80);
+        //powerUps.add(pu1);
         
         //Aggiungo blocchi
         blocks.add(new BreakableBlock (192,80));
-        blocks.add(new QuestionBlock (193,80, pu1.getType()));
+        //blocks.add(new QuestionBlock (193,80, pu1.getType()));
+        blocks.add(new QuestionBlock (193,80, enums.itemType.MUSHROOM));
         
         
         setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
@@ -240,7 +241,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         Iterator<Enemy> enemyIterator = enemies.iterator();
         while (enemyIterator.hasNext()) {
             Enemy enemy = enemyIterator.next();
-            enemy.update(WINDOW_WIDTH, WINDOW_HEIGHT, this.tileMap);
+            enemy.update(mapWidthPixels, mapHeightPixels, this.tileMap);
             if (!enemy.isAlive() && enemy.isRemovable()) {
                 enemyIterator.remove();
             }
@@ -256,20 +257,22 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         for (Block block : blocks) {
             block.update(mapWidthPixels, mapHeightPixels, tileMap);
         }
+        
+        //collioni mario e blocchi
         collisionManager.checkPlayerBlockCollisions(mario, blocks, coins, powerUps);
         
         //update monete
         Iterator<Coin> coinIterator = coins.iterator();
         while(coinIterator.hasNext()) {
         	Coin coin = coinIterator.next();
-            coin.update(WINDOW_WIDTH, WINDOW_HEIGHT, tileMap);
+            coin.update(mapWidthPixels, mapHeightPixels, tileMap);
             // Rimuovi la moneta se raccolta
             if (coin.isCollected()) {
                 coinIterator.remove();
             }
         }
         
-        //update powerup
+        //update powerup esistenti
         Iterator<PowerUp> powerUpIterator = powerUps.iterator();
         while (powerUpIterator.hasNext()) {
             PowerUp pu = powerUpIterator.next();
@@ -339,6 +342,8 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         cameraX = mario.getX() - WINDOW_WIDTH / 2;
         cameraY = mario.getY() - WINDOW_HEIGHT / 2;
         clampCamera();
+        
+        SwingUtilities.invokeLater(() -> this.repaint());
     }
     
     private void restartGame() {
@@ -354,12 +359,22 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         enemies.add(new Koopa(1018, 112));
 
         coins.add(new Coin(400, 112));
-        Mushroom pu1 = new Mushroom(193,80);
-        powerUps.add(pu1);
+        //Mushroom pu1 = new Mushroom(193,80);
+        //powerUps.add(pu1);
         blocks.add(new BreakableBlock(192,80));
-        blocks.add(new QuestionBlock(193,80, pu1.getType()));
+        blocks.add(new QuestionBlock(193,80, enums.itemType.MUSHROOM));
 
         gameState = GameState.PLAYING;
+        
+        if (gameThread != null && gameThread.isAlive()) {
+        	running = false;
+        	try {
+        		gameThread.join();
+        	} catch (InterruptedException e) {
+        		e.printStackTrace();
+        	}
+        }
+        	
         startGame(); // riavvia il thread
     }
 

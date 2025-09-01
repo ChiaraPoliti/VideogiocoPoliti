@@ -13,6 +13,7 @@ public class Coin extends GameObject {
 	private boolean isRising;
 	private boolean isRemovable;
 	private int initial_y;
+	protected boolean isSpawned;
 	
 	public final static int COIN_SIZE = 16;
 	public final static int VALUE = 5;
@@ -28,6 +29,8 @@ public class Coin extends GameObject {
 		this.isRising = false;
 		this.isRemovable = false;
 		this.initial_y = y;
+	
+		
 		
 		try {
 			java.net.URL imageUrl = getClass().getResource("/images/coin.png");
