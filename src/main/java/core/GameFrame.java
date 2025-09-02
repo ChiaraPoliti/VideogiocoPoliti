@@ -1,5 +1,6 @@
 package core; 
 import javax.swing.JFrame;
+//import audio.MusicPlayer;
 import java.awt.Dimension;
 
 
@@ -8,6 +9,7 @@ public class GameFrame extends JFrame {
  * Classe che serve per la creazione di una finestra, che conterrà la grafica del gioco.
  */
 	private GamePanel gamePanel; //dove verrà disegnato il gioco
+	//private MusicPlayer mp;
 	
 	public static final String NAME = "Super Mario Bros";
 	public static final int WINDOW_WIDTH = 800;
@@ -18,11 +20,12 @@ public class GameFrame extends JFrame {
 		this.setPreferredSize(new Dimension (WINDOW_WIDTH, WINDOW_HEIGHT));
 		this.setTitle(NAME);
 		this.setResizable(false);
-		this.setVisible(true);
+		//this.setVisible(true);
 		//this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.pack();
 		this.setLocationRelativeTo(null);
+		this.setVisible(true);
 		
 		this.gamePanel = new GamePanel ();
 		add(gamePanel);
@@ -30,10 +33,26 @@ public class GameFrame extends JFrame {
         this.gamePanel.requestFocusInWindow();
 		
         
- 
-		
+        //avvio musica
+        //this.mp = new MusicPlayer("resources/videobackground.wav");
 	}
+	
+	// avvia musica
+   /* public void startBackgroundMusic() {
+        if (mp != null) {
+            mp.playLoop();
+        }
+    }
 
+    // ferma musica
+    public void stopBackgroundMusic() {
+        if (mp != null) {
+            mp.stop();
+        }
+    }*/
+	
+	
+	
 
 }
 

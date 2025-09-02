@@ -41,6 +41,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
     private int cameraY;
     private CollisionManager collisionManager;
     private GameState gameState;
+    
 	
 	public GamePanel() {
 		this.mario = new Player (100,112);
@@ -123,9 +124,10 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
 	            //ORA MESSAGGIO PER CAPIRE, POI DA MODIFICARE
-	            JOptionPane.showMessageDialog(GamePanel.this, "Inizia il gioco!", "Avviso", JOptionPane.INFORMATION_MESSAGE);
+	            //JOptionPane.showMessageDialog(GamePanel.this, "Inizia il gioco!", "Avviso", JOptionPane.INFORMATION_MESSAGE);
 	            //System.out.println("Inizia  il gioco!");
 	            startGame();
+	            //frame.startBackgroundMusic();
 	            remove(bottoneAvvio);
 	            revalidate();
 	            repaint();
@@ -133,7 +135,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
 	            addKeyListener(GamePanel.this);
 	            setFocusable(true);
 	            requestFocusInWindow();
-	            System.out.println("focus su gamepanel");
+	            //System.out.println("focus su gamepanel");
 	        }
 	    }
 		);
@@ -145,6 +147,9 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         }
         gameThread = new Thread(this);
         gameThread.start();
+        
+        //avvio musica
+        //this.frame.startBackgroundMusic();
     }
 
     // Metodo per fermare il gioco (utile per Game Over o Pausa)
@@ -152,6 +157,9 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         synchronized (gameLoopLock) { // Sincronizza la scrittura di 'running'
             running = false;
         }
+        
+        //stop musica
+        //this.frame.stopBackgroundMusic();
     }
 
     @Override
@@ -317,6 +325,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         blocks.add(new QuestionBlock (528, 80, enums.itemType.COIN));
         blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN))*/
 
+       
         gameState = GameState.PLAYING;
         
         if (gameThread != null && gameThread.isAlive()) {
@@ -329,6 +338,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         }
         	
         startGame(); // riavvia il thread
+       
     }
 
 
@@ -365,6 +375,39 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
             cameraY = Math.max(minCameraY, Math.min(desiredCameraY, maxCameraY));
         }
     }
+    
+    private void drawScore(Graphics2D g2d) {
+        int padding = 10; // distanza dai bordi
+        int boxWidth = 95;
+        int boxHeight = 40;
+
+        // Sfondo del box
+        g2d.setColor(new Color(0, 0, 0, 0)); // semi-trasparente
+        g2d.fillRoundRect(padding, padding, boxWidth, boxHeight, 10, 10);
+
+        // Bordo del box
+        //g2d.setColor(Color.WHITE);
+        //g2d.drawRoundRect(padding, padding, boxWidth, boxHeight, 10, 10);
+
+        // Testo del punteggio
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
+        g2d.drawString("Score: " + mario.getScore(), padding + 10, padding + 25);
+    }
+    
+    private void drawLogo(Graphics2D g2d) {
+    	Image imageIcon = null;
+        java.net.URL logoUrl = getClass().getResource("/images/logo.png");
+        if (logoUrl != null) {
+            imageIcon = new ImageIcon(logoUrl).getImage();
+        }
+        
+        if (imageIcon != null) {
+            g2d.drawImage(imageIcon, getWidth() - 180, 10, 100, 50, null);
+        } else {
+        	System.out.println("logo non caricato");        }
+    }
+
     
     public void drawWorld (Graphics2D g2d) {
     	// Calcola quali tile sono visibili
@@ -438,6 +481,10 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
 	    for (PowerUp powerUp : powerUps) {
 	        powerUp.draw(g2d, cameraX, cameraY);
 	    }
+	    
+	    drawScore(g2d);
+	    drawLogo(g2d);
+
    }
 		
 	public void paintComponent(Graphics g) {
@@ -530,6 +577,10 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
             // la gravità e lo stato di isJumping/isOnGround gestiscono la caduta.
             System.out.println("Tasto rilasciato: " + keyCode);
      }
+
+
+    
+    
 
 }
 	
