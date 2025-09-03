@@ -140,13 +140,44 @@ public class Player extends MovableGameObject {
 		this.toBig();
 	}
 	
+	
+	@Override
+	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
+	    // Gestisce solo il movimento e la gravità
+		if (isMovingLeft) {
+	    	vel_x = -MAX_VEL_X;
+	    } else if (isMovingRight) {
+	        vel_x = MAX_VEL_X;
+	    } else {
+	    	vel_x = 0;
+	    }
+	    int nextX = this.x + vel_x;
+	    
+	    //this.x = nextX;
+	    
+	    this.vel_y += g;
+	    if (this.vel_y > MAX_FALL_SPEED) {
+	        this.vel_y = MAX_FALL_SPEED;
+	    }
+	    //this.y += this.vel_y;
+	    
+	    // Controlli per i limiti della mappa
+	    if (this.x < 0) this.x = 0;
+	    if (this.x + this.width > mapWidthPixels) this.x = mapWidthPixels - this.width;
+	    if (this.y > mapHeightPixels) { 
+	        this.hp = 0; // O la logica di morte che preferisci
+	    }
+	}
+	
+	
+	//MIO FUNZIONA
 	/**
 	 * Aggiorna il movimento di Mario.
 	 **/
-	@Override
+	/*@Override
 	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
 	    if (this.hp != 0) {
-			CollisionManager cm = new CollisionManager();
+			//CollisionManager cm = new CollisionManager();
 	
 		    // 1. Gestione del movimento orizzontale
 		    if (isMovingLeft) {
@@ -159,12 +190,12 @@ public class Player extends MovableGameObject {
 		    int nextX = this.x + vel_x;
 		    
 		    // 2. Controllo e aggiornamento della posizione orizzontale
-		    Rectangle futureBoundsX = new Rectangle(nextX, this.y, this.width, this.height);
-		    if (cm.checkMapCollision(futureBoundsX, tileMap)) {
-		        this.vel_x = 0; // Ferma il movimento
-		    } else {
-		        this.x = nextX;
-		    }
+		    //Rectangle futureBoundsX = new Rectangle(nextX, this.y, this.width, this.height);
+		    //if (cm.checkMapCollision(futureBoundsX, tileMap)) {
+		        //this.vel_x = 0; // Ferma il movimento
+		    //} else {
+		       // this.x = nextX;
+		    //}
 	
 		    // 3. Applicazione della gravità e gestione del salto
 		    if (isJumping && isOnGround) {
@@ -177,21 +208,21 @@ public class Player extends MovableGameObject {
 		    int nextY = this.y + (int) this.vel_y;
 		    
 		    // 5. Controllo e aggiornamento della posizione verticale
-		    Rectangle futureBoundsY = new Rectangle(this.x, nextY, this.width, this.height);
-		    if (cm.checkMapCollision(futureBoundsY, tileMap)) {
-		    	if (vel_y == 0) {
-		    		int tileRow = (nextY + this.height)/TileMap.TILE_SIZE;
-		    		this.y = tileRow * TileMap.TILE_SIZE - this.height;
-		    		this.isOnGround = true;
-		    	} else if (vel_y < 0) {
-		    		int tileRow = nextY / TileMap.TILE_SIZE;
-		    		this.y = (tileRow +1) * TileMap.TILE_SIZE;
-		    	}
-		    	vel_y = 0;
-		    } else {
-		    	this.y = nextY;
-		    	this.isOnGround= false;
-		    }
+		    //Rectangle futureBoundsY = new Rectangle(this.x, nextY, this.width, this.height);
+		    //if (cm.checkMapCollision(futureBoundsY, tileMap)) {
+		    	//if (vel_y == 0) {
+		    		//int tileRow = (nextY + this.height)/TileMap.TILE_SIZE;
+		    		//this.y = tileRow * TileMap.TILE_SIZE - this.height;
+		    		//this.isOnGround = true;
+		    	//} else if (vel_y < 0) {
+		    		//int tileRow = nextY / TileMap.TILE_SIZE;
+		    		//this.y = (tileRow +1) * TileMap.TILE_SIZE;
+		    	//}
+		    	//vel_y = 0;
+		    //} else {
+		    	//this.y = nextY;
+		    	//this.isOnGround= false;
+		    //}
 		       
 		    // 6. Limiti della mappa
 		    if (this.x < 0) {
@@ -208,7 +239,7 @@ public class Player extends MovableGameObject {
 	    }
 	    //System.out.println("DEBUG: Mario X=" + x + ", mapWidthPixels=" + mapWidthPixels);
 
-	}
+	}*/
 	
 	public void die() {
 		this.hp = 0;

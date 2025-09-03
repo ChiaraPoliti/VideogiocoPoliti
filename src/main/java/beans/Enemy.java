@@ -21,7 +21,7 @@ public abstract class Enemy extends MovableGameObject {
 	protected boolean isDangerous;
 	
 	public static final int VEL_X = 1;
-	public static final int MAX_FALL_SPEED = 3;
+	public static final int MAX_FALL_SPEED = 1;
 	
 	
 	public Enemy (int x, int y, int width, int height, Image image) {
@@ -33,7 +33,48 @@ public abstract class Enemy extends MovableGameObject {
 		this.isRemovable = false;
 		this.isDangerous = true;
 	}
+ 
+	@Override
+	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
+	    if (isAlive) {
+	        // La logica di collisione è stata spostata nel CollisionManager.
+	        // Questa classe si occupa solo del movimento.
 
+	        // 1. Gestione del movimento orizzontale
+	        int nextX = this.x;
+	        if (isMovingLeft) {
+	            nextX -= VEL_X;
+	        } else if (isMovingRight) {
+	            nextX += VEL_X;
+	        }
+	        this.setX(nextX);
+	        
+	        // 2. Applicazione della gravità
+	        this.vel_y += g;
+	        if (this.vel_y > MAX_FALL_SPEED) {
+	            this.vel_y = MAX_FALL_SPEED;
+	        }
+	        this.setY((int) (this.y + this.vel_y));
+	        
+	        // 3. Controlli per i limiti della mappa
+	        if (this.x < 0) {
+	        	this.x = 0;
+	        	this.isMovingLeft = !this.isMovingLeft;
+	        	this.isMovingRight = !this.isMovingRight;
+	        }
+	        if (this.x + this.width > mapWidthPixels) {
+	        	this.x = mapWidthPixels - this.width;
+	        	this.isMovingLeft = !this.isMovingLeft;
+	        	this.isMovingRight = !this.isMovingRight;
+	        }
+	        if (this.y > mapHeightPixels) { 
+	            this.die();
+	        }
+	    }
+	}
+	
+	//MIO FUNZIONA
+	/*
 	@Override
 	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
 	    if (isAlive) {
@@ -78,9 +119,9 @@ public abstract class Enemy extends MovableGameObject {
 		    } else {
 		    	this.y = nextY;
 		    	this.isOnGround= false;
-		    }
+		    } /////FINO A QUI
 
-	        /*// 4. Calcola la prossima posizione verticale
+	        // 4. Calcola la prossima posizione verticale
 	        int nextY = this.y + (int) this.vel_y;
 	        
 	        // 5. Controllo e aggiornamento della posizione verticale
@@ -101,7 +142,7 @@ public abstract class Enemy extends MovableGameObject {
 	        } else {
 	            this.y = nextY;
 	            this.isOnGround = false;
-	        }*/
+	        }
 		    
 		    int footX = isMovingRight ? x + width + VEL_X : x - VEL_X;
 		    int footY = y + height + 1; // un pixel sotto i piedi
@@ -119,8 +160,8 @@ public abstract class Enemy extends MovableGameObject {
 	        if (this.y > mapHeightPixels) { 
 	            this.die();
 	        }
-	    }
-	}
+	}*/
+
 	
 	
 	
@@ -180,6 +221,6 @@ public abstract class Enemy extends MovableGameObject {
 	public abstract void dealDamage(Player mario);
 	public abstract void draw(Graphics2D g, int cameraX, int cameraY);
 	
-	
+	}
 
-}
+

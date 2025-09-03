@@ -36,10 +36,145 @@ public class CollisionManager {
         }
     }
 
+	
+	/*public void checkPlayerTileCollisions(Player mario, TileMap tileMap) {
+	    // Calcola la posizione futura di Mario basandoti sulla velocità attuale
+	    int nextX = mario.getX() + mario.getVel_x();
+	    int nextY = mario.getY() + mario.getVel_y();
+	    
+	    // Rettangolo di collisione per la prossima posizione
+	    Rectangle nextBounds = new Rectangle(nextX, nextY, mario.getWidth(), mario.getHeight());
+
+	    // --- Gestione della collisione orizzontale ---
+	    int leftTile = nextBounds.x / TileMap.TILE_SIZE;
+	    int rightTile = (nextBounds.x + nextBounds.width - 1) / TileMap.TILE_SIZE;
+	    int topTile = nextBounds.y / TileMap.TILE_SIZE;
+	    int bottomTile = (nextBounds.y + nextBounds.height - 1) / TileMap.TILE_SIZE;
+
+	    if (mario.getVel_x() < 0) { // Movimento a sinistra
+	        for (int row = topTile; row <= bottomTile; row++) {
+	            if (tileMap.isTileSolid(leftTile, row)) {
+	                // Mario si ferma al bordo sinistro del blocco
+	                mario.setX((leftTile + 1) * TileMap.TILE_SIZE);
+	                mario.setVel_x(0);
+	                break;
+	            }
+	        }
+	    } else if (mario.getVel_x() > 0) { // Movimento a destra
+	        for (int row = topTile; row <= bottomTile; row++) {
+	            if (tileMap.isTileSolid(rightTile, row)) {
+	                // Mario si ferma al bordo destro del blocco
+	                mario.setX(rightTile * TileMap.TILE_SIZE - mario.getWidth());
+	                mario.setVel_x(0);
+	                break;
+	            }
+	        }
+	    }
+
+	    // --- Gestione della collisione verticale ---
+	    nextBounds.setLocation(mario.getX(), nextY); // Ricalcola i limiti con la posizione X corretta
+
+	    topTile = nextBounds.y / TileMap.TILE_SIZE;
+	    bottomTile = (nextBounds.y + nextBounds.height - 1) / TileMap.TILE_SIZE;
+	    leftTile = nextBounds.x / TileMap.TILE_SIZE;
+	    rightTile = (nextBounds.x + nextBounds.width - 1) / TileMap.TILE_SIZE;
+
+	    if (mario.getVel_y() > 0) { // Caduta
+	        for (int col = leftTile; col <= rightTile; col++) {
+	            if (tileMap.isTileSolid(col, bottomTile)) {
+	                mario.setVel_y(0);
+	                mario.setOnGround(true);
+	                mario.setJumping(false);
+	                mario.setY(bottomTile * TileMap.TILE_SIZE - mario.getHeight());
+	                break;
+	            }
+	        }
+	    } else if (mario.getVel_y() < 0) { // Salto
+	        for (int col = leftTile; col <= rightTile; col++) {
+	            if (tileMap.isTileSolid(col, topTile)) {
+	                mario.setVel_y(0);
+	                mario.setJumping(false); 
+	                mario.setY((topTile + 1) * TileMap.TILE_SIZE);
+	                break;
+	            }
+	        }
+	    }
+	}*/
+	
+	public void checkPlayerTileCollisions(Player mario, TileMap tileMap) {
+	    // Calcola la posizione futura di Mario basandoti sulla velocità attuale
+	    int nextX = mario.getX() + mario.getVel_x();
+	    int nextY = mario.getY() + mario.getVel_y();
+	    
+	    // Inizializza le posizioni finali
+	    int finalX = nextX;
+	    int finalY = nextY;
+
+	    // --- Gestione della collisione orizzontale ---
+	    Rectangle nextXBounds = new Rectangle(nextX, mario.getY(), mario.getWidth(), mario.getHeight());
+	    
+	    int leftTile = nextXBounds.x / TileMap.TILE_SIZE;
+	    int rightTile = (nextXBounds.x + nextXBounds.width - 1) / TileMap.TILE_SIZE;
+	    int topTile = nextXBounds.y / TileMap.TILE_SIZE;
+	    int bottomTile = (nextXBounds.y + nextXBounds.height - 1) / TileMap.TILE_SIZE;
+	    
+	    if (mario.getVel_x() < 0) { // Movimento a sinistra
+	        for (int row = topTile; row <= bottomTile; row++) {
+	            if (tileMap.isTileSolid(leftTile, row)) {
+	                mario.setVel_x(0);
+	                finalX = (leftTile + 1) * TileMap.TILE_SIZE;
+	                break;
+	            }
+	        }
+	    } else if (mario.getVel_x() > 0) { // Movimento a destra
+	        for (int row = topTile; row <= bottomTile; row++) {
+	            if (tileMap.isTileSolid(rightTile, row)) {
+	                mario.setVel_x(0);
+	                finalX = rightTile * TileMap.TILE_SIZE - mario.getWidth();
+	                break;
+	            }
+	        }
+	    }
+
+	    // --- Gestione della collisione verticale ---
+	    Rectangle nextYBounds = new Rectangle(mario.getX(), nextY, mario.getWidth(), mario.getHeight());
+
+	    topTile = nextYBounds.y / TileMap.TILE_SIZE;
+	    bottomTile = (nextYBounds.y + nextYBounds.height - 1) / TileMap.TILE_SIZE;
+	    leftTile = nextYBounds.x / TileMap.TILE_SIZE;
+	    rightTile = (nextYBounds.x + nextYBounds.width - 1) / TileMap.TILE_SIZE;
+
+	    if (mario.getVel_y() > 0) { // Caduta
+	        for (int col = leftTile; col <= rightTile; col++) {
+	            if (tileMap.isTileSolid(col, bottomTile)) {
+	                mario.setVel_y(0);
+	                mario.setOnGround(true);
+	                mario.setJumping(false);
+	                finalY = bottomTile * TileMap.TILE_SIZE - mario.getHeight();
+	                break;
+	            }
+	        }
+	    } else if (mario.getVel_y() < 0) { // Salto
+	        for (int col = leftTile; col <= rightTile; col++) {
+	            if (tileMap.isTileSolid(col, topTile)) {
+	                mario.setVel_y(0);
+	                mario.setJumping(false); 
+	                finalY = (topTile + 1) * TileMap.TILE_SIZE;
+	                break;
+	            }
+	        }
+	    }
+
+	    // Aggiorna la posizione finale di Mario dopo tutti i controlli
+	    mario.setX(finalX);
+	    mario.setY(finalY);
+	}
+	
+	//MIMO FUNZIONA
     /**
      * Gestisce le collisioni tra il giocatore e le piastrelle solide della mappa.
      */
-    public void checkPlayerTileCollisions(Player mario, TileMap tileMap) {
+    /*public void checkPlayerTileCollisions(Player mario, TileMap tileMap) {
     	this.checkMapCollision(mario.getBounds(), tileMap);
         // Salva le posizioni future per la collisione
         int nextX = (int) (mario.getX() + mario.getVel_x());
@@ -67,9 +202,85 @@ public class CollisionManager {
         	}
         	mario.setVel_y(0);
         }
-   }
+   }*/
     
-    public void checkEnemyTileCollisions(Enemy enemy, TileMap tileMap) {
+	public void checkEnemyTileCollisions(Enemy enemy, TileMap tileMap) {
+	    // Gestione della collisione verticale
+	    Rectangle enemyBoundsY = enemy.getBounds();
+	    
+	    // Calcola le coordinate delle piastrelle (tile) con cui l'oggetto potrebbe collidere
+	    int topTile = enemyBoundsY.y / TileMap.TILE_SIZE;
+	    int bottomTile = (enemyBoundsY.y + enemyBoundsY.height) / TileMap.TILE_SIZE;
+	    int leftTile = enemyBoundsY.x / TileMap.TILE_SIZE;
+	    int rightTile = (enemyBoundsY.x + enemyBoundsY.width - 1) / TileMap.TILE_SIZE;
+
+	    boolean collisionY = false;
+	    for (int col = leftTile; col <= rightTile; col++) {
+	        if (enemy.getVel_y() > 0) { // Caduta
+	            if (tileMap.isTileSolid(col, bottomTile)) {
+	                collisionY = true;
+	                enemy.setVel_y(0);
+	                enemy.setOnGround(true);
+	                enemy.setY(bottomTile * TileMap.TILE_SIZE - enemy.getHeight());
+	                break;
+	            }
+	        } else if (enemy.getVel_y() < 0) { // Salto (improbabile per i nemici, ma buona pratica)
+	            if (tileMap.isTileSolid(col, topTile)) {
+	                collisionY = true;
+	                enemy.setVel_y(0);
+	                enemy.setY((topTile + 1) * TileMap.TILE_SIZE);
+	                break;
+	            }
+	        }
+	    }
+	    
+	    // Aggiorna lo stato "onGround" anche se non c'è una collisione
+	    if (!collisionY) {
+	        enemy.setOnGround(false);
+	    }
+	    
+	    // Gestione della collisione orizzontale
+	    Rectangle enemyBoundsX = enemy.getBounds();
+
+	    topTile = enemyBoundsX.y / TileMap.TILE_SIZE;
+	    bottomTile = (enemyBoundsX.y + enemyBoundsX.height - 1) / TileMap.TILE_SIZE;
+	    leftTile = enemyBoundsX.x / TileMap.TILE_SIZE;
+	    rightTile = (enemyBoundsX.x + enemyBoundsX.width) / TileMap.TILE_SIZE;
+
+	    for (int row = topTile; row <= bottomTile; row++) {
+	        if (enemy.getVel_x() < 0) { // Movimento a sinistra
+	            if (tileMap.isTileSolid(leftTile, row)) {
+	                enemy.setMovingLeft(!enemy.isMovingLeft());
+	                enemy.setMovingRight(!enemy.isMovingRight());
+	                enemy.setX((leftTile + 1) * TileMap.TILE_SIZE);
+	                break;
+	            }
+	        } else if (enemy.getVel_x() > 0) { // Movimento a destra
+	            if (tileMap.isTileSolid(rightTile, row)) {
+	                enemy.setMovingLeft(!enemy.isMovingLeft());
+	                enemy.setMovingRight(!enemy.isMovingRight());
+	                enemy.setX(rightTile * TileMap.TILE_SIZE - enemy.getWidth());
+	                break;
+	            }
+	        }
+	    }
+
+	    // Aggiungiamo un controllo extra per far girare i nemici
+	    // quando raggiungono il bordo di una piattaforma
+	    int footX = enemy.isMovingRight() ? enemy.getX() + enemy.getWidth() + 1 : enemy.getX() - 1;
+	    int footY = enemy.getY() + enemy.getHeight() + 1; // Un pixel sotto i piedi
+	    
+	    int footTileX = footX / TileMap.TILE_SIZE;
+	    int footTileY = footY / TileMap.TILE_SIZE;
+
+	    if (!tileMap.isTileSolid(footTileX, footTileY) && enemy.isOnGround()) {
+	        enemy.setMovingLeft(!enemy.isMovingLeft());
+	        enemy.setMovingRight(!enemy.isMovingRight());
+	    }
+	}
+    
+    //MIO FUNZIONA
+    /*public void checkEnemyTileCollisions(Enemy enemy, TileMap tileMap) {
     	this.checkMapCollision(enemy.getBounds(), tileMap);
         // Salva le posizioni future per la collisione
         int nextX = (int) (enemy.getX() + enemy.getVel_x());
@@ -97,7 +308,7 @@ public class CollisionManager {
         	enemy.setVel_y(0);
         }
         
-   }
+   }*/
 
     
     /**
