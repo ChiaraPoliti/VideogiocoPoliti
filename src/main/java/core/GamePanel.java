@@ -45,12 +45,8 @@ public class GamePanel extends JPanel implements Runnable{
 	
 	public GamePanel() {
 		this.mario = new Player (100,112); //UNICO
-		//this.mario = mario;
-		//this.enemies = new ArrayList<>();
-	    //this.coins = new ArrayList<>();
 	    this.powerUps = new ArrayList<>();
-	    //this.blocks = new ArrayList<>(); 
-	    //this.gameState = GameState.PLAYING;
+	    
 	    
 	    Level1 level1 = new Level1();
         this.enemies = level1.getEnemies();
@@ -64,83 +60,16 @@ public class GamePanel extends JPanel implements Runnable{
         
         String tilesImagesPath = "/tiles/";
         this.tileMap = new TileMap(mapLayersPaths, tilesImagesPath);
-        //System.out.println("--- DEBUG MAP DIMENSIONS ---");
-        //System.out.println("Mappa Caricata - Colonne: " + tileMap.getCols());
-        //System.out.println("Mappa Caricata - Righe: " + tileMap.getRows());
-        //System.out.println("Mappa Caricata - Larghezza in Pixels: " + (tileMap.getCols() * TileMap.TILE_SIZE));
-        //System.out.println("--- FINE DEBUG ---");
+        
 		
-        //camera
-        //cameraX = mario.getX()-this.WINDOW_WIDTH/2;
+        
         cameraX = mario.getX() - GamePanel.WINDOW_WIDTH/2;
         cameraY = mario.getY() - GamePanel.WINDOW_HEIGHT/2;
-        //cameraY = mario.getY() - this.WINDOW_HEIGHT/2;
         clampCamera();
         
         this.collisionManager = new CollisionManager();
         this.gameState = GameState.PLAYING;
 
-        
-        /*// Aggiungi nemici
-        enemies.add(new Goomba(250, 128));
-        enemies.add(new Goomba(550, 128));
-        enemies.add(new Goomba(1050, 128));
-        enemies.add(new Koopa(1018, 112));
-        
-        
-        // Aggiungi una moneta
-        coins.add(new Coin(400, 128));
-        //coins.add(new Coin ())
-        coins.add(new Coin (896, 64));
-        coins.add(new Coin (912,64));
-        coins.add(new Coin (928,64));
-        
-        //Aggiungo blocchi
-        blocks.add(new BreakableBlock (176,80));
-        blocks.add(new BreakableBlock (544,80));
-        blocks.add(new BreakableBlock (224,80));
-        blocks.add(new BreakableBlock (896,80));
-        blocks.add(new BreakableBlock (912,80));
-        blocks.add(new BreakableBlock (928,80));
-        
-        
-        blocks.add(new QuestionBlock (192,80, enums.itemType.MUSHROOM));
-        blocks.add(new QuestionBlock (912,32, enums.itemType.MUSHROOM));
-        
-        blocks.add(new QuestionBlock (528, 80, enums.itemType.COIN));
-        blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN));*/
-        
-        
-        setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
-        setLayout(new BorderLayout()); // Usa BorderLayout per il bottone iniziale
-        
-		/*JButton bottoneAvvio = new JButton("Start Game");
-	    bottoneAvvio.setFont(new Font("Arial", Font.BOLD, 24));
-	    bottoneAvvio.setForeground(Color.BLACK);
-	    bottoneAvvio.setBackground(Color.WHITE);
-	    bottoneAvvio.setOpaque(true);
-	    bottoneAvvio.setBorderPainted(false);
-		this.add(bottoneAvvio, BorderLayout.SOUTH);
-		
-		bottoneAvvio.addActionListener(new ActionListener(){
-	        @Override
-	        public void actionPerformed(ActionEvent e) {
-	            //ORA MESSAGGIO PER CAPIRE, POI DA MODIFICARE
-	            //JOptionPane.showMessageDialog(GamePanel.this, "Inizia il gioco!", "Avviso", JOptionPane.INFORMATION_MESSAGE);
-	            //System.out.println("Inizia  il gioco!");
-	            startGame();
-	            //frame.startBackgroundMusic();
-	            remove(bottoneAvvio);
-	            revalidate();
-	            repaint();
-	            
-	            addKeyListener(GamePanel.this);
-	            setFocusable(true);
-	            requestFocusInWindow();
-	            //System.out.println("focus su gamepanel");
-	        }
-	    }
-		);*/
 	}
 	
 	public void startGame() {
@@ -230,8 +159,8 @@ public class GamePanel extends JPanel implements Runnable{
         }
 
         // collisioni nemici e mappa
-        collisionManager.checkPlayerTileCollisions(mario, tileMap);
-        collisionManager.checkPlayerEnemyCollisions(mario, enemies);
+        //collisionManager.checkPlayerTileCollisions(mario, tileMap);
+        //collisionManager.checkPlayerEnemyCollisions(mario, enemies);
         
         
         //update blocchi
@@ -240,7 +169,7 @@ public class GamePanel extends JPanel implements Runnable{
         }
         
         //collioni mario e blocchi
-        collisionManager.checkPlayerBlockCollisions(mario, blocks, coins, powerUps);
+        //collisionManager.checkPlayerBlockCollisions(mario, blocks, coins, powerUps);
         //repaint();
         
         //update monete
@@ -254,7 +183,7 @@ public class GamePanel extends JPanel implements Runnable{
             }
         }
         
-        collisionManager.checkPlayerCoinCollisions(mario, coins);
+        //collisionManager.checkPlayerCoinCollisions(mario, coins);
         
         
         
@@ -265,16 +194,18 @@ public class GamePanel extends JPanel implements Runnable{
             pu.update(mapWidthPixels, mapHeightPixels, tileMap);
 
             // Controlla collisione con Mario
-            if (!pu.isCollected() && mario.getBounds().intersects(pu.getBounds())) {
-                pu.applyEffect(mario);
-                pu.setCollected(true);
-            }
+            //if (!pu.isCollected() && mario.getBounds().intersects(pu.getBounds())) {
+               // pu.applyEffect(mario);
+               // pu.setCollected(true);
+            //}
 
             // Rimuovi power-up raccolto
             if (pu.isCollected()) {
                 powerUpIterator.remove();
             }
         }
+        
+        collisionManager.checkAllCollisions(mario, enemies, blocks,coins,powerUps,tileMap);
         
         if (mario.getHp() == 0) {
         	stopGame();
@@ -292,11 +223,7 @@ public class GamePanel extends JPanel implements Runnable{
     }
     
     public void restartGame() {
-        //mario = new Player(100,112);
-       // enemies.clear();
-        //coins.clear();
-        //powerUps.clear();
-        //blocks.clear();
+        
     	mario.resetState();
     	enemies.clear();
         coins.clear();
@@ -310,33 +237,6 @@ public class GamePanel extends JPanel implements Runnable{
         coins = level1.getCoins();
         powerUps.clear();
 
-     /* Aggiungi nemici
-        enemies.add(new Goomba(250, 128));
-        enemies.add(new Goomba(550, 128));
-        enemies.add(new Goomba(1050, 128));
-        enemies.add(new Koopa(1018, 112));
-        
-        
-        // Aggiungi una moneta
-        coins.add(new Coin(400, 128));
-        coins.add(new Coin (896, 64));
-        coins.add(new Coin (912,64));
-        coins.add(new Coin (928,64));
-        
-        //Aggiungo blocchi
-        blocks.add(new BreakableBlock (176,80));
-        blocks.add(new BreakableBlock (544,80));
-        blocks.add(new BreakableBlock (896,80));
-        blocks.add(new BreakableBlock (912,80));
-        blocks.add(new BreakableBlock (928,80));
-        blocks.add(new BreakableBlock (224,80));
-        
-        
-        blocks.add(new QuestionBlock (192,80, enums.itemType.MUSHROOM));
-        blocks.add(new QuestionBlock (912,32, enums.itemType.MUSHROOM));
-        
-        blocks.add(new QuestionBlock (528, 80, enums.itemType.COIN));
-        blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN))*/
 
        
         gameState = GameState.PLAYING;
@@ -398,9 +298,6 @@ public class GamePanel extends JPanel implements Runnable{
         g2d.setColor(new Color(0, 0, 0, 0)); // semi-trasparente
         g2d.fillRoundRect(padding, padding, boxWidth, boxHeight, 10, 10);
 
-        // Bordo del box
-        //g2d.setColor(Color.WHITE);
-        //g2d.drawRoundRect(padding, padding, boxWidth, boxHeight, 10, 10);
 
         // Testo del punteggio
         g2d.setColor(Color.BLACK);
@@ -505,7 +402,7 @@ public class GamePanel extends JPanel implements Runnable{
 		Graphics2D g2d = (Graphics2D) g;
 		
 		if(gameState == GameState.GAME_OVER) {
-			//drawWorld(g2d);
+			
 			
 			//Overlay nero semitrasparente
 			g2d.setColor(new Color (0, 0, 0, 180));
@@ -573,54 +470,6 @@ public class GamePanel extends JPanel implements Runnable{
 		this.mario = mario;
 	}
 	
-
-    
-    /*public void keyPressed(KeyEvent e) {
-        int keyCode = e.getKeyCode();
-        if (keyCode == KeyEvent.VK_RIGHT) {
-        	mario.setMovingRight(true);
-            System.out.println("Destra premuto.");
-        } else if (keyCode == KeyEvent.VK_LEFT) {
-            mario.setMovingLeft(true);
-            System.out.println("Sinistra premuto.");
-        } else if (keyCode == KeyEvent.VK_SPACE) {
-        	mario.jump();
-        	System.out.println("Salto.");
-        	
-        }
-        
-        if(gameState == GameState.GAME_OVER && e.getKeyCode() == KeyEvent.VK_ENTER) {
-        	restartGame();
-        }
-        
-        if(gameState == GameState.WIN && e.getKeyCode() == KeyEvent.VK_ENTER) {
-        	restartGame();
-        }
-        
-    }
-    
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        int keyCode = e.getKeyCode();
-        if (keyCode == KeyEvent.VK_RIGHT) {
-        	mario.setMovingRight(false); // Mario smette di muoversi a destra
-            System.out.println("Destra rilasciato.");
-        } else if (keyCode == KeyEvent.VK_LEFT) {
-            mario.setMovingLeft(false); // Mario smette di muoversi a sinistra
-            System.out.println("Sinistra rilasciato.");
-        }
-            // Il rilascio di SPACE non ha un effetto diretto sulla velocità di salto in Mario,
-            // la gravità e lo stato di isJumping/isOnGround gestiscono la caduta.
-            System.out.println("Tasto rilasciato: " + keyCode);
-     }*/
-
-
-    
-    
 
 }
 	

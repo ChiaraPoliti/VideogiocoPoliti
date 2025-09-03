@@ -9,6 +9,7 @@ import core.TileMap;
 //import enums.blockType;
 import beans.Enemy;
 import beans.GameObject;
+import beans.Koopa;
 import beans.PowerUp;
 import beans.Block;
 import beans.Coin;
@@ -133,17 +134,24 @@ public class CollisionManager {
     public void checkPlayerEnemyCollisions(Player mario, List<Enemy> enemies) {
         for (Enemy enemy : enemies) {
             if (enemy.isAlive() && mario.getBounds().intersects(enemy.getBounds())) {
-                // Collisione tra Mario e un nemico rilevata
-                // Se Mario sta scendendo e il suo piede è sopra il nemico
-                if (mario.getVel_y() > 0 && mario.getBounds().y + mario.getHeight() < enemy.getBounds().y + enemy.getHeight()) {
-                    enemy.die();
-                    mario.setVel_y(-10); // Piccolo rimbalzo per feedback
-                } else {
-                    mario.takeDamage(1); // Mario viene danneggiato
-                }
+            	if (mario.getVel_y() > 0 && mario.getBounds().y + mario.getHeight() < enemy.getBounds().y + enemy.getHeight()) {
+            		if (enemy instanceof Koopa ) {
+	            		Koopa koopa = (Koopa) enemy;
+	            		koopa.die();
+	            		//koopa.standBy();
+            		} else {
+            			enemy.die();
+            			mario.setVel_y(-10);
+            		}
+            	} else {
+            		mario.takeDamage(1);
+            	}
             }
         }
-    }
+   }
+            	
+            	
+            
     
     /**
      * Gestisce le collisioni tra Mario e i blocchi speciali (rompibili, domanda, ecc).
@@ -162,8 +170,12 @@ public class CollisionManager {
 				if (hittingFromBelow) {
 					GameObject spawned = block.hit();
 					//System.out.println("Blocco colpito" + intersection);
-					if (spawned != null && spawned instanceof PowerUp) {
+					if (spawned != null) {
+						if (spawned instanceof PowerUp) {
 						powerUps.add((PowerUp) spawned);
+						} else if (spawned instanceof Coin) {
+						coins.add((Coin)spawned);
+						}
 					}
 
 					mario.setVel_y(0);
@@ -202,7 +214,9 @@ public class CollisionManager {
 	public void checkPlayerPowerUpCollisions(Player mario, List<PowerUp> powerUps){
 		for (PowerUp powerUp : powerUps) {
 			if (!powerUp.isCollected() && mario.getBounds().intersects(powerUp.getBounds())) {
+				powerUp.applyEffect(mario);
 				powerUp.setCollected(true);
+				
 			}
 		}
 	
