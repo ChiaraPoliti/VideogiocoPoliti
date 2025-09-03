@@ -24,8 +24,8 @@ public class Player extends MovableGameObject {
 	public static final int MAX_FALL_SPEED = 15;
 	public static final int NORMAL_HEIGHT = 20;
 	public static final int NORMAL_WIDTH = 24;
-	public static final int BIG_HEIGHT = 30;
-	public static final int BIG_WIDTH = 32;
+	public static final int BIG_HEIGHT = 25;
+	public static final int BIG_WIDTH = 30;
 	public static final int JUMP_VEL = -13;
 	
 	public Player(int x, int y) {
@@ -76,7 +76,7 @@ public class Player extends MovableGameObject {
 	    this.isJumping = false;
 	    this.hp = 1; // Resetta gli HP o lo stato di potenza
 	    this.score = 0;
-	    // Aggiungi altre proprietà da resettare se necessario (ad es. il punteggio)
+	   
 	}
 	
 	public void hit() {

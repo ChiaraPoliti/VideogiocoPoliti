@@ -15,26 +15,31 @@ import beans.Coin;
 
 public class CollisionManager {
 
-    /**
-     * Controlla tutte le collisioni tra gli oggetti di gioco.
-     */
-    /*public void checkAllCollisions(Player mario, List<Enemy> enemies, List<Block> blocks, List<Coin> coins, List<PowerUp> powerUps, TileMap tileMap) {
-        // Controlla le collisioni tra Mario e le piastrelle solide
+	public void checkAllCollisions(Player mario, List<Enemy> enemies, List<Block> blocks, List<Coin> coins, List<PowerUp> powerUps, TileMap tileMap) {
+        // 1. Controlla le collisioni del giocatore con la mappa
         checkPlayerTileCollisions(mario, tileMap);
 
-        // Controlla le collisioni tra Mario e i nemici
+        // 2. Controlla le collisioni del giocatore con i nemici
         checkPlayerEnemyCollisions(mario, enemies);
-        
-        //controllo collisioni tra Mario e blocchi
+
+        // 3. Controlla le collisioni del giocatore con i blocchi
         checkPlayerBlockCollisions(mario, blocks, coins, powerUps);
-        
-        
-    }*/
+
+        // 4. Controlla le collisioni del giocatore con monete e power-up
+        checkPlayerCoinCollisions(mario, coins);
+        checkPlayerPowerUpCollisions(mario, powerUps);
+
+        // 5. Aggiungi i controlli per le collisioni dei nemici con la mappa
+        for (Enemy enemy : enemies) {
+            checkEnemyTileCollisions(enemy, tileMap);
+        }
+    }
 
     /**
      * Gestisce le collisioni tra il giocatore e le piastrelle solide della mappa.
      */
     public void checkPlayerTileCollisions(Player mario, TileMap tileMap) {
+    	this.checkMapCollision(mario.getBounds(), tileMap);
         // Salva le posizioni future per la collisione
         int nextX = (int) (mario.getX() + mario.getVel_x());
         int nextY = (int) (mario.getY() + mario.getVel_y());
@@ -61,6 +66,36 @@ public class CollisionManager {
         	}
         	mario.setVel_y(0);
         }
+   }
+    
+    public void checkEnemyTileCollisions(Enemy enemy, TileMap tileMap) {
+    	this.checkMapCollision(enemy.getBounds(), tileMap);
+        // Salva le posizioni future per la collisione
+        int nextX = (int) (enemy.getX() + enemy.getVel_x());
+        int nextY = (int) (enemy.getY() + enemy.getVel_y());
+
+        // Collisioni orizzontali
+        Rectangle futureBoundsX = new Rectangle(nextX, enemy.getY(), enemy.getWidth(), enemy.getHeight());
+        if (checkMapCollision(futureBoundsX, tileMap)) {
+        	enemy.setVel_x(0);
+        }
+
+        // Collisioni verticali
+        Rectangle futureBoundsY = new Rectangle(enemy.getX(), nextY, enemy.getWidth(), enemy.getHeight());
+        if (checkMapCollision(futureBoundsY, tileMap)) {
+        	if (enemy.getVel_y() > 0) {
+        		int collisionRow = (nextY + enemy.getHeight()) / TileMap.TILE_SIZE;
+        		enemy.setY(collisionRow * TileMap.TILE_SIZE - enemy.getHeight());
+        		enemy.setOnGround(true);
+        	} else if (enemy.getVel_y()<0) {
+        		int collisionRow = nextY / TileMap.TILE_SIZE;
+        		//mario.setOnGround(false);
+        		enemy.setY((collisionRow +1) * TileMap.TILE_SIZE);
+        		//mario.setVel_y(0);
+        	}
+        	enemy.setVel_y(0);
+        }
+        
    }
 
     
@@ -115,29 +150,20 @@ public class CollisionManager {
      */
     
     public void checkPlayerBlockCollisions(Player mario, List<Block> blocks, List<Coin> coins, List<PowerUp> powerUps) {
-    	//boolean onAnyBlock = false;
     	for (Block block : blocks) {
-			/*if (block.isHit()) {
-				continue;
-			}*/
 			
 			Rectangle headBox = mario.getHeadBox();
 			Rectangle triggerBox = block.getTriggerBox();
 			//Rectangle blockBounds = block.getBounds();
 		    
 			//collisione da sotto
-			if (headBox.intersects(triggerBox)) {
-				//Rectangle intersection = headBox.intersection(triggerBox); 
+			if (headBox.intersects(triggerBox)) { 
 				boolean hittingFromBelow = mario.getVel_y() < 0;
 				if (hittingFromBelow) {
 					GameObject spawned = block.hit();
 					//System.out.println("Blocco colpito" + intersection);
-					if (spawned != null) {
-						if (spawned instanceof Coin) {
-							coins.add((Coin) spawned);
-						} else if (spawned instanceof PowerUp){
-							powerUps.add((PowerUp) spawned);
-						}
+					if (spawned != null && spawned instanceof PowerUp) {
+						powerUps.add((PowerUp) spawned);
 					}
 
 					mario.setVel_y(0);
@@ -146,9 +172,10 @@ public class CollisionManager {
 					continue;
 				}
 			}
+			
 			//collisione da sopra (gravità - piattaforma)
-			Rectangle feetBox = new Rectangle(mario.getX(), mario.getY() + mario.getHeight() - 2, mario.getWidth(), 2);
-		    Rectangle blockTop = new Rectangle(block.getX(), block.getY(), block.getWidth(), 2);
+			Rectangle feetBox = new Rectangle(mario.getX(), mario.getY() + mario.getHeight() - 2, mario.getWidth(), 10);
+		    Rectangle blockTop = new Rectangle(block.getX(), block.getY(), block.getWidth(), 10);
 
 			
 	        //if (feetBox.intersects(blockBounds) && mario.getVel_y() >= 0) {
@@ -157,7 +184,6 @@ public class CollisionManager {
 	            mario.setY(block.getY() - mario.getHeight());
 	            mario.setOnGround(true);
 	            mario.setJumping(false);
-	            //onAnyBlock = true;
 	        }
 			
 		}
@@ -168,6 +194,15 @@ public class CollisionManager {
 			if (!coin.isCollected() && mario.getBounds().intersects(coin.getBounds())) {
 				coin.collect();
 				mario.setScore(mario.getScore()+coin.getValue());
+			}
+		}
+	
+	}
+	
+	public void checkPlayerPowerUpCollisions(Player mario, List<PowerUp> powerUps){
+		for (PowerUp powerUp : powerUps) {
+			if (!powerUp.isCollected() && mario.getBounds().intersects(powerUp.getBounds())) {
+				powerUp.setCollected(true);
 			}
 		}
 	

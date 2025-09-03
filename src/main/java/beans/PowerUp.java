@@ -151,7 +151,7 @@ public abstract class PowerUp extends GameObject {
 		this.isCollected = isCollected;
 	}
 
-
+	
 	/**
 	 * @return the type
 	 */
