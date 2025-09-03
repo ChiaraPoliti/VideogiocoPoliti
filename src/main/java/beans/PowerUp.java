@@ -6,10 +6,6 @@ import java.awt.Rectangle;
 import core.TileMap;
 import enums.itemType;
 
-/**
- * @author Chiara Politi
- */
-
 public abstract class PowerUp extends GameObject {
 	/**
 	 * Classe astratta per la creazione dei potenziamenti.

@@ -9,7 +9,6 @@ import core.TileMap;
 /**
  * Classe che definisce in maniera astratta tutti gli oggetti dinamici che saranno
  * presenti nella mia mappa del gioco.
- * @author Chiara
  */
 
 public abstract class GameObject {
@@ -27,87 +26,64 @@ public abstract class GameObject {
 		this.image = image;
 	}
 	
+	/**
+	 * I due metodi astratti che dovranno essere implementati da ogni sottoclasse
+	 * 
+	 * @param mapWidthPixels è la larghezza della mappa;
+	 * @param mapHeightPixels è l'altezza della mappa;
+	 * @param tileMap è la mappa vera e propria.
+	 */
+	 
+	public abstract void update (int mapWidthPixels, int mapHeightPixels, TileMap tileMap); //Aggiornamemto logico
+	public abstract void draw(Graphics2D g, int cameraX, int cameraY); //Disegna gli oggetti con le giuste immagini
 	
-	public abstract void update (int mapWidthPixels, int mapHeightPixels, TileMap tileMap);
-	public abstract void draw(Graphics2D g, int cameraX, int cameraY);
-	
+	/**
+	 * Metodo che definisce un rettangolo che circonda l'oggetto, utile per le collisioni
+	 * @return Rectangle.
+	 */
 	public Rectangle getBounds() {
         return new Rectangle(x, y, width, height);
     }
-
-	/**
-	 * @return the x
-	 */
+	
+	
+	//GETTER E SETTER
 	public int getX() {
 		return x;
 	}
 	
-	/**
-	 * @return the y
-	 */
 	public int getY() {
 		return y;
 	}
 
-	/**
-	 * @return the width
-	 */
 	public int getWidth() {
 		return width;
 	}
 
-	/**
-	 * @return the height
-	 */
 	public int getHeight() {
 		return height;
 	}
 
-	/**
-	 * @return the image
-	 */
 	public Image getImage() {
 		return image;
 	}
 
-	
-	
-	/**
-	 * @param x the x to set
-	 */
 	public void setX(int x) {
 		this.x = x;
 	}
 
-
-	/**
-	 * @param y the y to set
-	 */
 	public void setY(int y) {
 		this.y = y;
 	}
 
-	/**
-	 * @param width the width to set
-	 */
 	public void setWidth(int width) {
 		this.width = width;
 	}
 
-	/**
-	 * @param height the height to set
-	 */
 	public void setHeight(int height) {
 		this.height = height;
 	}
 
-	/**
-	 * @param image the image to set
-	 */
 	public void setImage(Image image) {
 		this.image = image;
 	}
-	
-	
-
 }

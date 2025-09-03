@@ -1,3 +1,4 @@
+
 package beans;
 
 import java.awt.Color;
@@ -20,6 +21,7 @@ public class Player extends MovableGameObject {
 	private int hp;
 	
 	public static final int MAX_VEL_X = 3;
+	public static final int MAX_FALL_SPEED = 15;
 	public static final int NORMAL_HEIGHT = 20;
 	public static final int NORMAL_WIDTH = 24;
 	public static final int BIG_HEIGHT = 30;
@@ -57,6 +59,31 @@ public class Player extends MovableGameObject {
 		}else if (isBig) {
 			this.toSmall();
 		}
+	}
+
+	public void resetState() {
+	    this.x = 100; // Posizione X iniziale
+	    this.y = 112; // Posizione Y iniziale
+	    this.height = this.NORMAL_HEIGHT;
+	    this.width = this.NORMAL_WIDTH;
+	    this.vel_x = 0;
+	    this.vel_y = 0;
+	    this.isMovingLeft = false;
+	    this.isMovingRight = false;
+	    this.isOnGround = false;
+	    this.isBig = false;
+	    this.isRunning = false;
+	    this.isJumping = false;
+	    this.hp = 1; // Resetta gli HP o lo stato di potenza
+	    this.score = 0;
+	    // Aggiungi altre proprietà da resettare se necessario (ad es. il punteggio)
+	}
+	
+	public void hit() {
+	    this.hp--;
+	    if (this.hp <= 0) {
+	        this.die(); // Chiamare un metodo per gestire la morte del giocatore
+	    }
 	}
 	
 	/**
@@ -112,7 +139,6 @@ public class Player extends MovableGameObject {
 	public void getMushroom (Mushroom mushroom) {
 		this.toBig();
 	}
-	
 	
 	/**
 	 * Aggiorna il movimento di Mario.
@@ -213,9 +239,9 @@ public class Player extends MovableGameObject {
 	
 	public Rectangle getHeadBox() {
 		if(!this.isBig) {
-			 return new Rectangle(this.x, this.y, this.width, 13); // metà superiore del player
+			 return new Rectangle(this.x, this.y, this.width, 8); // metà superiore del player
 		} else {
-			return new Rectangle(this.x, this.y, this.width, 10);
+			return new Rectangle(this.x, this.y, this.width, 8);
 		}
 	   
 	}

@@ -2,30 +2,30 @@ package core;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;   
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+//import java.awt.event.ActionEvent;   
+//import java.awt.event.ActionListener;
+//import java.awt.event.KeyEvent;
+//import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import beans.Block;
-import beans.BreakableBlock;
+//import beans.BreakableBlock;
 import beans.Coin;
 import beans.Enemy;
-import beans.GameObject;
-import beans.Goomba;
-import beans.Koopa;
-import beans.Mushroom;
+//import beans.GameObject;
+//import beans.Goomba;
+//import beans.Koopa;
+//import beans.Mushroom;
 import beans.Player;
 import beans.PowerUp;
-import beans.QuestionBlock;
+//import beans.QuestionBlock;
 import logic.CollisionManager;
 import logic.Level1;
 import enums.GameState;
 
-public class GamePanel extends JPanel implements Runnable,KeyListener {
+public class GamePanel extends JPanel implements Runnable{
 	private Thread gameThread;
 	private boolean running = false;
 	private Player mario;
@@ -44,7 +44,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
     
 	
 	public GamePanel() {
-		this.mario = new Player (100,112);
+		this.mario = new Player (100,112); //UNICO
 		//this.mario = mario;
 		//this.enemies = new ArrayList<>();
 	    //this.coins = new ArrayList<>();
@@ -71,8 +71,10 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         //System.out.println("--- FINE DEBUG ---");
 		
         //camera
-        cameraX = mario.getX()-this.WINDOW_WIDTH/2;
-        cameraY = mario.getY() - this.WINDOW_HEIGHT/2;
+        //cameraX = mario.getX()-this.WINDOW_WIDTH/2;
+        cameraX = mario.getX() - GamePanel.WINDOW_WIDTH/2;
+        cameraY = mario.getY() - GamePanel.WINDOW_HEIGHT/2;
+        //cameraY = mario.getY() - this.WINDOW_HEIGHT/2;
         clampCamera();
         
         this.collisionManager = new CollisionManager();
@@ -112,7 +114,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         setLayout(new BorderLayout()); // Usa BorderLayout per il bottone iniziale
         
-		JButton bottoneAvvio = new JButton("Start Game");
+		/*JButton bottoneAvvio = new JButton("Start Game");
 	    bottoneAvvio.setFont(new Font("Arial", Font.BOLD, 24));
 	    bottoneAvvio.setForeground(Color.BLACK);
 	    bottoneAvvio.setBackground(Color.WHITE);
@@ -138,15 +140,19 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
 	            //System.out.println("focus su gamepanel");
 	        }
 	    }
-		);
+		);*/
 	}
 	
 	public void startGame() {
-        synchronized (gameLoopLock) { // Sincronizza la scrittura di 'running'
+        /*synchronized (gameLoopLock) { // Sincronizza la scrittura di 'running'
             running = true;
-        }
-        gameThread = new Thread(this);
-        gameThread.start();
+        }*/
+		if (!running) {
+			gameThread = new Thread(this);
+			running = true;
+			gameThread.start();
+		}
+        
         
         //avvio musica
         //this.frame.startBackgroundMusic();
@@ -190,6 +196,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         }
     }
 
+    
     
     private void update() {
     	if (gameState == GameState.GAME_OVER || gameState == GameState.WIN) {
@@ -284,13 +291,19 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
         repaint();
     }
     
-    private void restartGame() {
-        mario = new Player(100,112);
+    public void restartGame() {
+        //mario = new Player(100,112);
        // enemies.clear();
         //coins.clear();
         //powerUps.clear();
         //blocks.clear();
-        
+    	mario.resetState();
+    	enemies.clear();
+        coins.clear();
+        powerUps.clear();
+        blocks.clear();
+    	
+        this.gameState = GameState.PLAYING;
         Level1 level1 = new Level1();
         enemies = level1.getEnemies();
         blocks = level1.getBlocks();
@@ -531,10 +544,38 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
 		}
 		
     }
+
+	/**
+	 * @return the gameState
+	 */
+	public GameState getGameState() {
+		return gameState;
+	}
+
+	/**
+	 * @param gameState the gameState to set
+	 */
+	public void setGameState(GameState gameState) {
+		this.gameState = gameState;
+	}
+
+	/**
+	 * @return the mario
+	 */
+	public Player getMario() {
+		return mario;
+	}
+
+	/**
+	 * @param mario the mario to set
+	 */
+	public void setMario(Player mario) {
+		this.mario = mario;
+	}
 	
 
     
-    public void keyPressed(KeyEvent e) {
+    /*public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         if (keyCode == KeyEvent.VK_RIGHT) {
         	mario.setMovingRight(true);
@@ -560,7 +601,6 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
     
     @Override
     public void keyTyped(KeyEvent e) {
-        // Not typically used for direct game controls like movement
     }
 
     @Override
@@ -576,7 +616,7 @@ public class GamePanel extends JPanel implements Runnable,KeyListener {
             // Il rilascio di SPACE non ha un effetto diretto sulla velocità di salto in Mario,
             // la gravità e lo stato di isJumping/isOnGround gestiscono la caduta.
             System.out.println("Tasto rilasciato: " + keyCode);
-     }
+     }*/
 
 
     

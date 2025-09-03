@@ -1,18 +1,20 @@
 package beans;
 
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
-
 import core.TileMap;
 import enums.blockType;
 
+/**
+ * Classe astratta che estende GameObject che definisce il concetto di blocco.
+ * Non è un oggetto mobile (non si sposta orizzontalmente), ma ha un minimo spostamento se colpito
+ */
 public abstract class Block extends GameObject {
 	protected blockType type;
 	protected boolean isHit;
-	//protected int bounceVelY;
-	//protected int originalY;
+	protected int bounceVelY;
+	protected int originalY;
 	
-	public static final int BLOCK_SIZE = 16;
+	protected static final int BLOCK_SIZE = 16;
 	protected static final int BOUNCE_HEIGHT = 10; 
     protected static final int BOUNCE_SPEED = 2;
 	
@@ -21,118 +23,88 @@ public abstract class Block extends GameObject {
 		super (x, y, BLOCK_SIZE, BLOCK_SIZE, null);
 		this.type = type;
 		this.isHit = false;	
-		//this.bounceVelY = 0;
-		//this.originalY = y;
+		this.bounceVelY = 0;
+		this.originalY = y;
 	}
 	
-	/*public Rectangle getHitBox() {
-	    int extraWidth = 14;  // allarga 2 pixel per lato
-	    int extraHeight = 10; // allunga un po' verso l'alto
-	    return new Rectangle(
-	        this.x - extraWidth / 2,
-	        this.y - extraHeight,
-	        this.width + extraWidth,
-	        this.height + extraHeight
-	    );
-	}*/
-	
+	/**
+	 * Metodo che crea un'area rettangolare intorno al blocco centrata nel punto in basso a sinistra
+	 * Utile per le collisioni
+	 */
 	public Rectangle getTriggerBox() {
-	    return new Rectangle(this.x-1, this.y + this.height - 13, this.width, 32);
-		//return new Rectangle(this.x, this.y + this.height, this.width, 5);
+		return new Rectangle(this.x, this.y + this.height, this.width, 10);
 	}
+
+	/**
+	 * Metodo ereditato da GameObject: aggiorna la logica di 'moto' del blocco:
+	 * effettua un piccolo rimbalzo se colpito da Mario
+	 */
+	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
+		if (bounceVelY != 0) { // se il blocco si muove in qualche modo
+            this.y += bounceVelY; // a priori aggiorno la posizione per MRU
+            if (bounceVelY < 0) { //se il blocco sale
+                if (this.y <= originalY - BOUNCE_HEIGHT) { // se la posizione nuova nel blocco non ha superato la soglia fissata di rimbalzo
+                    this.y = originalY - BOUNCE_HEIGHT; // aggiorno la posizione del blocco fissandola a quella in cui arrivo
+                    bounceVelY = BOUNCE_SPEED; //e inverto il senso della velocità per farlo scendere
+                } //
+            } else { //se il blocco scende
+                if (this.y >= originalY) { // se la posizione nuova è almeno uguale a quella originale
+                    this.y = originalY; //fisso la posizione aquella originale
+                    bounceVelY = 0; // azzero la velocità
+                }
+            }
+        }
+    }
+	
+	//Metodo astratto che definisce il comportamento del blocco.
+	//Dipende dal tipo di blocco considerato.
+	public abstract GameObject hit(); // qui verrà impostata la velocità dei blocchi negativa, in modo da far scattare l'if presente nell'update()
 
 	
-	public abstract GameObject hit();
-	public abstract void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap);
-	public abstract void draw (Graphics2D g, int cameraX, int cameraY);
-
-	/**
-	 * @return the x
-	 */
-	public int getX() {
-		return x;
-	}
-
-	/**
-	 * @return the y
-	 */
-	public int getY() {
-		return y;
-	}
-
-	/**
-	 * @return the height
-	 */
-	public int getHeight() {
-		return height;
-	}
-
-	/**
-	 * @return the width
-	 */
-	public int getWidth() {
-		return width;
-	}
-
-	/**
-	 * @return the type
-	 */
+	//GETTER E SETTER
 	public blockType getType() {
 		return type;
 	}
 
-	/**
-	 * @return the isHit
-	 */
 	public boolean isHit() {
 		return isHit;
 	}
 
 	
+	public int getBounceVelY() {
+		return bounceVelY;
+	}
+
+	public int getOriginalY() {
+		return originalY;
+	}
 	
-	
-	/**
-	 * @return the blockSize
-	 */
 	public static int getBlockSize() {
 		return BLOCK_SIZE;
 	}
 
-	/**
-	 * @param x the x to set
-	 */
-	public void setX(int x) {
-		this.x = x;
+	public static int getBounceHeight() {
+		return BOUNCE_HEIGHT;
 	}
 
-	/**
-	 * @param y the y to set
-	 */
-	public void setY(int y) {
-		this.y = y;
+	public static int getBounceSpeed() {
+		return BOUNCE_SPEED;
 	}
 
-	/**
-	 * @param height the height to set
-	 */
-	public void setHeight(int height) {
-		this.height = height;
+	public void setType(blockType type) {
+		this.type = type;
 	}
 
-	/**
-	 * @param width the width to set
-	 */
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	/**
-	 * @param isHit the isHit to set
-	 */
 	public void setHit(boolean isHit) {
 		this.isHit = isHit;
 	}
 
-	
+	public void setBounceVelY(int bounceVelY) {
+		this.bounceVelY = bounceVelY;
+	}
+
+	public void setOriginalY(int originalY) {
+		this.originalY = originalY;
+	}	
 	
 }

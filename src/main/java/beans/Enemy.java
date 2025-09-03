@@ -18,8 +18,10 @@ public abstract class Enemy extends MovableGameObject {
 	 */
 	protected boolean isAlive;
 	protected boolean isRemovable;
+	protected boolean isDangerous;
 	
 	public static final int VEL_X = 1;
+	public static final int MAX_FALL_SPEED = 3;
 	
 	
 	public Enemy (int x, int y, int width, int height, Image image) {
@@ -29,6 +31,7 @@ public abstract class Enemy extends MovableGameObject {
 		this.isOnGround = true;
 		this.isAlive = true;
 		this.isRemovable = false;
+		this.isDangerous = true;
 	}
 
 
@@ -121,6 +124,8 @@ public abstract class Enemy extends MovableGameObject {
 	    }
 	}
 	
+	
+	
 	/*@Override
 	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
 		if(isAlive) {
@@ -181,6 +186,8 @@ public abstract class Enemy extends MovableGameObject {
 	}*/
 	
 	
+	
+
 	public void die() {
 		this.isAlive = false;
 		this.isRemovable = true;
@@ -236,6 +243,6 @@ public abstract class Enemy extends MovableGameObject {
 	public abstract void dealDamage(Player mario);
 	public abstract void draw(Graphics2D g, int cameraX, int cameraY);
 	
-	//le collisioni sono gestite nel CollisionManager
+	
 
 }

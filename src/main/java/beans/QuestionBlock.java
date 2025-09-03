@@ -2,35 +2,25 @@ package beans;
 
 import enums.blockType;
 import enums.itemType;
-
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
-import core.TileMap;
-
-
+/**
+ * Blocco che contiene un'entità del gioco, potenziamento o moneta
+ */
 public class QuestionBlock extends Block {
-	//private boolean isEmpty;
-	private int originalY;
 	private Image emptyBlock;
 	private itemType contentItemType;
-	private boolean isContentReleased;
-	private int bounceVelY; 
-	
-	private static final int BOUNCE_HEIGHT = 10; 
-    private static final int BOUNCE_SPEED = 2; 
+	private boolean isContentReleased; 
 	
 	public QuestionBlock(int x, int y, itemType contentItemType) {
 		super(x,y, blockType.QUESTION);
 		this.contentItemType = contentItemType;
 		this.isContentReleased = false;
-		this.originalY = y;
-		this.bounceVelY = 0;
 		
+		//estraggo sia l'immagine standard che l'immagine da colpito
 		try {
 			java.net.URL imageUrl = getClass().getResource("/tiles/tile_2.png");
 	        if (imageUrl != null) {
@@ -41,8 +31,7 @@ public class QuestionBlock extends Block {
 	            this.image = null;
 	        }
 	        
-	     // Caricamento dell'immagine vuota (se esiste)
-            java.net.URL emptyBlockUrl = getClass().getResource("/tiles/tile_3.png"); 
+	        java.net.URL emptyBlockUrl = getClass().getResource("/tiles/tile_3.png"); 
             if (emptyBlockUrl != null) {
                 this.emptyBlock = new ImageIcon(emptyBlockUrl).getImage(); 
             } else {
@@ -57,51 +46,56 @@ public class QuestionBlock extends Block {
 	    }
     }
 
+	/**
+	 * Metodo che definsice il comportamento di un blocco quando viene colpito
+	 * @return GameObject, l'oggetto contenuto, generato dal metodo createItem()
+	 */
 	@Override
 	public GameObject hit() {
 		if(!this.isContentReleased) {
 			super.setHit(true);
 			this.isContentReleased = true;
-			System.out.println("Blocco vuoto.");
-			//this.releasePowerUp();
-			
-			this.bounceVelY = -BOUNCE_SPEED;
-			
-			return createItem();
+			//System.out.println("Blocco vuoto.");
+			this.bounceVelY = -BOUNCE_SPEED; // fisso la velocità di rimbalzo a valore negativo (così sale e si attiva l'if in Block.update()
+			return createItem(); // restituisce l'oggetto contenuto nel blocco
 		} else {
 			if (this.image == this.emptyBlock) {
-				this.bounceVelY = -BOUNCE_SPEED / 2;
-			System.out.println("Blocco già vuoto.");
+				this.bounceVelY = 0; // se il contenuto è già stato rilasciato, il blocco rimane fisso
+				//System.out.println("Blocco già vuoto.");
 			}
 			return null;
 		}
 	}
 
-	
+	/**
+	 * Metodo per la generazione degli oggetti contenuti nei blocchi ?
+	 * @return GameObject, che può essere al momento solo Coin o Mushroom
+	 */
 	private GameObject createItem() {
-		int itemX = this.x;
-		//int itemX = this.x + (this.width/2) - (GameObject.getWidth() / 2);
-        int itemY = this.y - Block.BLOCK_SIZE;
-		//int itemY = this.y - GameObject.getHeight();
+		int itemX = this.x; //fisso le coordinate dell'oggetto: uguale a quella del blocco
+        int itemY = this.y - Block.BLOCK_SIZE; // y più alta perché l'oggetto esce sopra il blocco
         
         switch (contentItemType) {
         case COIN:
             Coin coin = new Coin(itemX, itemY);
             coin.setVel_y(-BOUNCE_SPEED); // La moneta "salta" verso l'alto
-      
             return coin;
             
         case MUSHROOM:
             Mushroom mushroom = new Mushroom(itemX, itemY);
-            // Il fungo potrebbe salire e poi iniziare a muoversi orizzontalmente
             mushroom.setVel_y(-BOUNCE_SPEED); 
             return mushroom;
             
+        //possibili espansioni del gioco, non implementate ad ora
         /*case STAR:
-            // return star;
+         	Star star = new Star (itemX, itemY);
+         	star.setVel_y(-BOUNCE_SPEED)
+            return star;
         
         case FIREFLOWER:
-            // return flower;*/
+        	FireFlower ff = new FireFlower (itemX, itemY)
+        	ff.setVel_y(-BOUNCE_SPEED);
+            return flower;*/
             
         default:
             System.err.println("Tipo di item non supportato: " + contentItemType);
@@ -109,143 +103,55 @@ public class QuestionBlock extends Block {
         }
 	}
 
-	@Override
-	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
-		if (bounceVelY != 0) {
-            this.y += bounceVelY;
-            if (bounceVelY < 0) { 
-                if (this.y <= originalY - BOUNCE_HEIGHT) {
-                    this.y = originalY - BOUNCE_HEIGHT; 
-                    bounceVelY = BOUNCE_SPEED; 
-                }
-            } else { 
-                if (this.y >= originalY) {
-                    this.y = originalY; 
-                    bounceVelY = 0;
-                }
-            }
-        }
-    }
-
+	/**
+	 * Metodo che disegna gli oggetti usando le immagini importate nel costruttore
+	 */
 	@Override
 	public void draw(Graphics2D g, int cameraX, int cameraY) {
-		int screenX = this.x - cameraX;
+		int screenX = this.x - cameraX; // fisso le coordinate dello schermo, adattando le coordinate dell'entità alla camera (scroll)
 		int screenY = this.y - cameraY;
-		Image currentImage = null;
+		Image currentImage = null; // definisco una nuova variabile che contiene l'immagine istantanea del blocco
 		
-		if (this.isContentReleased) {
+		if (this.isContentReleased) { //se il contenuto è già stato rilasciato
 			currentImage = this.emptyBlock;
 		} else {
 			currentImage = this.image;
 		} 
 		
 		if (currentImage != null) {
-			g.drawImage(currentImage, screenX, screenY, this.width, this.height, null);	
+			g.drawImage(currentImage, screenX, screenY, this.width, this.height, null);	//disegno
 		} else {
 			if (this.isContentReleased) {
-				g.setColor(Color.YELLOW.darker());
+				g.setColor(Color.YELLOW.darker()); //colori alternativi in caso di assenza delle immagini
 			} else {
 				g.setColor(Color.YELLOW);
 			}
 			g.fillRect (screenX, screenY, this.width, this.height);
 		}
-		
-		
+	}
+
 	
-		
-	}
-
-	/**
-	 * @return the originalY
-	 */
-	public int getOriginalY() {
-		return originalY;
-	}
-
-	/**
-	 * @return the emptyBlock
-	 */
+	//GETTER E SETTER
 	public Image getEmptyBlock() {
 		return emptyBlock;
 	}
 
-	/**
-	 * @return the contentItemType
-	 */
 	public itemType getContentItemType() {
 		return contentItemType;
 	}
 
-	/**
-	 * @return the isContentReleased
-	 */
 	public boolean isContentReleased() {
 		return isContentReleased;
 	}
-
-	/**
-	 * @return the bounceHeight
-	 */
-	public static int getBounceHeight() {
-		return BOUNCE_HEIGHT;
-	}
-
-	/**
-	 * @return the bounceSpeed
-	 */
-	public static double getBounceSpeed() {
-		return BOUNCE_SPEED;
-	}
-
-	/**
-	 * @return the bounceVelY
-	 */
-	public double getBounceVelY() {
-		return bounceVelY;
-	}
-
-	/**
-	 * @param originalY the originalY to set
-	 */
-	public void setOriginalY(int originalY) {
-		this.originalY = originalY;
-	}
-
-	/**
-	 * @param emptyBlock the emptyBlock to set
-	 */
 	public void setEmptyBlock(Image emptyBlock) {
 		this.emptyBlock = emptyBlock;
 	}
 
-	/**
-	 * @param contentItemType the contentItemType to set
-	 */
 	public void setContentItemType(itemType contentItemType) {
 		this.contentItemType = contentItemType;
 	}
 
-	/**
-	 * @param isContentReleased the isContentReleased to set
-	 */
 	public void setContentReleased(boolean isContentReleased) {
 		this.isContentReleased = isContentReleased;
 	}
-
-	/**
-	 * @param bounceVelY the bounceVelY to set
-	 */
-	public void setBounceVelY(int bounceVelY) {
-		this.bounceVelY = bounceVelY;
-	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-
 }

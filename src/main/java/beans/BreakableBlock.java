@@ -5,17 +5,20 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 
 import javax.swing.ImageIcon;
-
-import core.TileMap;
 import enums.blockType;
 
+/**
+ * Blocco che si rompe se colpito
+ */
 public class BreakableBlock extends Block {
-	protected boolean isRemovable;
+	//Sarebbe da inserire per poter effettivamente eliminare i blocchi rotti dal loop del gioco
+	//private boolean isRemovable;
 	private Image emptyBlock;
 	
 	public BreakableBlock(int x, int y) {
-		super(x,y, blockType.BREAKABLE );
+		super(x,y, blockType.BREAKABLE);
 		
+		//importo le immagini che mi servono
 		try {
 			java.net.URL imageUrl = getClass().getResource("/tiles/tile_1.png");
 	        if (imageUrl != null) {
@@ -25,7 +28,7 @@ public class BreakableBlock extends Block {
 	            System.err.println("ERRORE: Immagine di blocco non trovata nel classpath: /tiles/tile_1.png");
 	            this.image = null;
 	        }
-	     // Caricamento dell'immagine vuota (se esiste)
+	     
 	        java.net.URL emptyBlockUrl = getClass().getResource("/tiles/tile_3.png"); 
             if (emptyBlockUrl != null) {
                 this.emptyBlock = new ImageIcon(emptyBlockUrl).getImage(); 
@@ -41,61 +44,52 @@ public class BreakableBlock extends Block {
 	    }
 	}
 
+	/**
+	 * Metodo che definsice il comportamento di un blocco quando viene colpito
+	 * @return GameObject, l'oggetto contenuto, generato dal metodo createItem()
+	 */
 	@Override
 	public GameObject hit() {
 		if(!this.isHit) {
 			this.isHit = true;
-			System.out.println("Blocco rotto!");
-			this.isRemovable = true;
+			//System.out.println("Blocco rotto!");
+			//this.isRemovable = true;
+			this.bounceVelY = -BOUNCE_SPEED;
 		}
 		return null;
 	}
 
-	
-	@Override
-	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
-	}
-	/*@Override
-	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
-	    if (bounceVelY != 0) {
-	        this.y += bounceVelY;
-	        if (bounceVelY < 0) {
-	            if (this.y <= originalY - BOUNCE_HEIGHT) {
-	                this.y = originalY - BOUNCE_HEIGHT;
-	                bounceVelY = BOUNCE_SPEED;
-	            }
-	        } else {
-	            if (this.y >= originalY) {
-	                this.y = originalY;
-	                bounceVelY = 0;
-	            }
-	        }
-	    }
-	}*/
-
-	
-	
+	/**
+	 * Metodo che disegna gli oggetti usando le immagini importate nel costruttore
+	 */
 	@Override
 	public void draw(Graphics2D g, int cameraX, int cameraY) {
-		int screenX = this.x - cameraX;
+		int screenX = this.x - cameraX; // fisso le coordinate dello schermo, adattando le coordinate dell'entità alla camera (scroll)
 		int screenY = this.y - cameraY;
-		Image currentImage = null;
+		Image currentImage = null; // definisco una nuova variabile che contiene l'immagine istantanea del blocco
 		
-		if (this.isHit) {
+		if (this.isHit) { //in base al suo stato (colpito o no) varia l'immagine
 			currentImage = this.emptyBlock;
 		} else {
 			currentImage = this.image;
 		} 
 		
-		//if (!this.isHit) {
-			if(currentImage != null) {
-				g.drawImage(currentImage, screenX, screenY, this.width, this.height, null);
-			}else {
-				//g.setColor(java.awt.Color.CYAN);
-				g.setColor(new Color (140,140,230));
-				g.fillRect(screenX, screenY, this.width, this.height);
-			}
-		//}
+		
+		if(currentImage != null) { //se l'immagine esiste
+			g.drawImage(currentImage, screenX, screenY, this.width, this.height, null); //la disegno
+		}else {  
+			g.setColor(new Color (140,140,230)); //fisso un nuovo colore (ciano) sostitutivo a riempimento
+			g.fillRect(screenX, screenY, this.width, this.height);
+		}
+		
+	}
+	
+	//GETTER E SETTER
+	public Image getEmptyBlock() {
+		return emptyBlock;
 	}
 
+	public void setEmptyBlock(Image emptyBlock) {
+		this.emptyBlock = emptyBlock;
+	}
 }
