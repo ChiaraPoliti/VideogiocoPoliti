@@ -2,153 +2,162 @@ package core;
 
 import javax.swing.*;
 import java.awt.*;
-//import java.awt.event.ActionEvent;   
-//import java.awt.event.ActionListener;
-//import java.awt.event.KeyEvent;
-//import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import beans.Block;
-//import beans.BreakableBlock;
 import beans.Coin;
 import beans.Enemy;
-//import beans.GameObject;
-//import beans.Goomba;
-//import beans.Koopa;
-//import beans.Mushroom;
 import beans.Player;
 import beans.PowerUp;
-//import beans.QuestionBlock;
 import logic.CollisionManager;
 import logic.Level1;
 import enums.GameState;
 
 public class GamePanel extends JPanel implements Runnable{
 	private Thread gameThread;
-	private boolean running = false;
+	private boolean running;
 	private Player mario;
 	private List<beans.Enemy> enemies;
 	private List<beans.Coin> coins;
 	private List<beans.PowerUp> powerUps; 
 	private List<beans.Block> blocks;
 	private final Object gameLoopLock = new Object();
-	public static final int WINDOW_WIDTH = 800;
-    public static final int WINDOW_HEIGHT = 200;
     private TileMap tileMap;
     private int cameraX;
     private int cameraY;
     private CollisionManager collisionManager;
     private GameState gameState;
     
+    private static final int WINDOW_WIDTH = 800;
+    private static final int WINDOW_HEIGHT = 200;
+    
 	
 	public GamePanel() {
 		this.mario = new Player (100,112); //UNICO
 	    this.powerUps = new ArrayList<>();
+	    running = false;
 	    
-	    
+	    //creo livello con percorso definito
 	    Level1 level1 = new Level1();
+	    
+	    //definisco gli attributi
         this.enemies = level1.getEnemies();
         this.blocks = level1.getBlocks();
         this.coins = level1.getCoins();
 		
+        //Lista per i path dei file csv della TileMap
 		List<String> mapLayersPaths = new ArrayList<>();
 		mapLayersPaths.add("/maps/marioTileset_background.csv"); 
         mapLayersPaths.add("/maps/marioTileset_sfondo.csv"); 
         mapLayersPaths.add("/maps/marioTileset_terreno.csv");
         
+        
         String tilesImagesPath = "/tiles/";
-        this.tileMap = new TileMap(mapLayersPaths, tilesImagesPath);
+        this.tileMap = new TileMap(mapLayersPaths, tilesImagesPath); //definisco la mappa
         
-		
+		//Definisco le variabili che individuano la camera (finestra visibile < mappa livello ==> si sposta ma centrata su Mario)
+        this.cameraX = mario.getX() - GamePanel.WINDOW_WIDTH/2;
+        this.cameraY = mario.getY() - GamePanel.WINDOW_HEIGHT/2;
+        clampCamera(); //gestione camera
         
-        cameraX = mario.getX() - GamePanel.WINDOW_WIDTH/2;
-        cameraY = mario.getY() - GamePanel.WINDOW_HEIGHT/2;
-        clampCamera();
-        
+        //creo un collisionManager per rilevare e gestire le collisioni
         this.collisionManager = new CollisionManager();
-        this.gameState = GameState.PLAYING;
+        this.gameState = GameState.PLAYING; //aggiorno lo stato di gioco perché si deve attivare
 
 	}
 	
+	/**
+	 * Metodo che avvia il 'gioco' --> apre il Thread impostandolo sullo stato di gioco
+	 */
 	public void startGame() {
-        /*synchronized (gameLoopLock) { // Sincronizza la scrittura di 'running'
-            running = true;
-        }*/
-		if (!running) {
-			gameThread = new Thread(this);
-			running = true;
-			gameThread.start();
+		synchronized (gameLoopLock) { //garantisce l'apertura di un singolo thread
+			running = true; 
 		}
+		gameThread = new Thread(this);
+		gameThread.start(); //esegue il metodo run()
         
-        
+		//Tentativo di inserimento di musica, ma servono altre librerie.
+		//Possibile espansione
         //avvio musica
         //this.frame.startBackgroundMusic();
     }
 
-    // Metodo per fermare il gioco (utile per Game Over o Pausa)
+    /**
+     * Metodo per fermare il gioco (utile per Game Over o Pausa)
+     */
     public void stopGame() {
-        synchronized (gameLoopLock) { // Sincronizza la scrittura di 'running'
-            running = false;
+        synchronized (gameLoopLock) {
+            running = false; //ferma il thread
         }
         
+        //Tentativo inserimento musica
         //stop musica
         //this.frame.stopBackgroundMusic();
     }
 
+    
+    /**
+     * Metodo di aggiornamento del thread
+     */
     @Override
     public void run() {
-        // Il loop continuerà finché 'running' è true.
-        // La lettura di 'running' deve essere sincronizzata.
+        // Il loop continua finché 'running' è true.
         while (true) {
             boolean currentRunningState;
-            synchronized (gameLoopLock) { // Sincronizza la lettura di 'running'
+            synchronized (gameLoopLock) {
                 currentRunningState = running;
             }
 
             if (!currentRunningState) {
-                break; // Esci dal loop se 'running' è diventato false
+                break; // Esce dal loop se 'running' è diventato false
             }
 
-            update();
-            repaint();
+            update(); //Aggiorna il gioco
+            repaint(); //ridisegna la schermata (swing) by paintcomponent
 
             try {
-                Thread.sleep(1000 / 60);
+                Thread.sleep(1000 / 60); //frequenza degli aggiornamenti
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 System.out.println("Game loop interrupted.");
-                stopGame(); // Assicurati di fermare il gioco in caso di interruzione
+                stopGame(); // ferma il gioco in caso di interruzione
                 break;
             }
         }
     }
 
     
-    
+    /**
+     * aggiorna la logica di gioco, gestendo i componenti e le collisioni
+     */
     private void update() {
+    	//se il gioco non è in PLAYING esce
     	if (gameState == GameState.GAME_OVER || gameState == GameState.WIN) {
     		return;
     	}
     	
+    	//Recupero le misure della mappa in pixel da passare ai vari update()
         int mapWidthPixels = tileMap.getCols() * TileMap.TILE_SIZE;
         int mapHeightPixels = tileMap.getRows() * TileMap.TILE_SIZE;
 
-        //Update Player
+        //COMINCIANO GLI AGGIORNAMENTI DI TUTTI
+        //Player
         mario.update(mapWidthPixels, mapHeightPixels, tileMap);
         
         //verifica tile vittoria
         int marioCol = (mario.getX() + mario.getWidth() / 2) / TileMap.TILE_SIZE;
         int marioRow = (mario.getY() + mario.getHeight() / 2) / TileMap.TILE_SIZE;
-        Tile currentTile = tileMap.getTile(1, marioRow, marioCol); // layer 0 o quello giusto
+        Tile currentTile = tileMap.getTile(1, marioRow, marioCol); //livello 1 perché si trova lì nella mappa
 
+        //id tile dell'asta è 22
         if (currentTile != null && currentTile.getId() == 22) {
             gameState = GameState.WIN;
         }
 
         
-        // Update Nemici e rimozione morti
+        //Nemici e rimozione morti
         Iterator<Enemy> enemyIterator = enemies.iterator();
         while (enemyIterator.hasNext()) {
             Enemy enemy = enemyIterator.next();
@@ -158,89 +167,71 @@ public class GamePanel extends JPanel implements Runnable{
             }
         }
 
-        // collisioni nemici e mappa
-        //collisionManager.checkPlayerTileCollisions(mario, tileMap);
-        //collisionManager.checkPlayerEnemyCollisions(mario, enemies);
         
-        
-        //update blocchi
+        //Blocchi
         for (Block block : blocks) {
             block.update(mapWidthPixels, mapHeightPixels, tileMap);
         }
+      
         
-        //collioni mario e blocchi
-        //collisionManager.checkPlayerBlockCollisions(mario, blocks, coins, powerUps);
-        //repaint();
-        
-        //update monete
+        //Monete
         Iterator<Coin> coinIterator = coins.iterator();
         while(coinIterator.hasNext()) {
         	Coin coin = coinIterator.next();
             coin.update(mapWidthPixels, mapHeightPixels, tileMap);
-            // Rimuovi la moneta se raccolta
+            // Rimuove la moneta se raccolta
             if (coin.isCollected()) {
                 coinIterator.remove();
             }
         }
-        
-        //collisionManager.checkPlayerCoinCollisions(mario, coins);
-        
-        
-        
-        //update powerup esistenti
+     
+        //Powerup esistenti
         Iterator<PowerUp> powerUpIterator = powerUps.iterator();
         while (powerUpIterator.hasNext()) {
             PowerUp pu = powerUpIterator.next();
             pu.update(mapWidthPixels, mapHeightPixels, tileMap);
 
-            // Controlla collisione con Mario
-            //if (!pu.isCollected() && mario.getBounds().intersects(pu.getBounds())) {
-               // pu.applyEffect(mario);
-               // pu.setCollected(true);
-            //}
-
-            // Rimuovi power-up raccolto
+      
+            // Rimuove power-up raccolto
             if (pu.isCollected()) {
                 powerUpIterator.remove();
             }
         }
         
+        //CONTROLLO COLLISIONI TOTALE
         collisionManager.checkAllCollisions(mario, enemies, blocks,coins,powerUps,tileMap);
         
+        
+        //Aggiorno stato di gioco sulla base di vite di Mario e ridisegna
         if (mario.getHp() == 0) {
         	stopGame();
         	gameState = GameState.GAME_OVER;
         	repaint();
         }
         
-        // --- LOGICA DI CAMERA ---
+        // GESTIONE CAMERA 
         cameraX = mario.getX() - WINDOW_WIDTH / 2;
         cameraY = mario.getY() - WINDOW_HEIGHT / 2;
         clampCamera();
         
-        //SwingUtilities.invokeLater(() -> this.repaint());
-        repaint();
+        
+        repaint(); //ridisegno tutto
     }
     
     public void restartGame() {
-        
-    	mario.resetState();
-    	enemies.clear();
+    	mario.resetState(); //riporto mario all'inizio
+    	enemies.clear(); //elimino il resto
         coins.clear();
         powerUps.clear();
         blocks.clear();
     	
-        this.gameState = GameState.PLAYING;
-        Level1 level1 = new Level1();
+        this.gameState = GameState.PLAYING; //aggiorno stato di gioco
+        Level1 level1 = new Level1(); //ricarico il livello e le relative liste di elementi
         enemies = level1.getEnemies();
         blocks = level1.getBlocks();
         coins = level1.getCoins();
-        powerUps.clear();
-
-
        
-        gameState = GameState.PLAYING;
-        
+        //Interrompe il thread
         if (gameThread != null && gameThread.isAlive()) {
         	running = false;
         	try {
@@ -249,46 +240,53 @@ public class GamePanel extends JPanel implements Runnable{
         		e.printStackTrace();
         	}
         }
-        	
+        
+        //per poi riavviare tutto
         startGame(); // riavvia il thread
        
     }
-
-
     
-	
+	/**
+	 * Metodo che sposta la camera/focus 
+	 */
     private void clampCamera() {
-        int mapWidthPixels = tileMap.getCols() * TileMap.TILE_SIZE;
+        int mapWidthPixels = tileMap.getCols() * TileMap.TILE_SIZE; //dimensioni della mappa in pixel
         int mapHeightPixels = tileMap.getRows() * TileMap.TILE_SIZE;
         
         //Centro camera su Mario
-        int desiredCameraX = mario.getX() - WINDOW_WIDTH/2; 
-        int minCameraX = 0;
-        int maxCameraX = mapWidthPixels - WINDOW_WIDTH;
+        int desiredCameraX = mario.getX() - WINDOW_WIDTH/2; // posizione ideale del focus 
+        //range valido della camera
+        int minCameraX = 0; // non può andare più a sinistra del limite
+        int maxCameraX = mapWidthPixels - WINDOW_WIDTH; // oltre a questo ci sarebbe il vuoto
         
-        // Limita orizzontalmente
-        // Se la mappa è più piccola della finestra, centrala
-        if (mapWidthPixels < GameFrame.WINDOW_WIDTH) {
-            cameraX = maxCameraX / 2;
-        } else { // Altrimenti, blocca ai bordi della mappa
-            cameraX = Math.max(minCameraX, Math.min(desiredCameraX, Math.max(0, maxCameraX)));
+        // Limita orizzontalmente: mappa è più piccola della finestra --> da centrare
+        if (mapWidthPixels < GameFrame.WINDOW_WIDTH) { //se la mappa è più piccola della finestra
+            cameraX = maxCameraX / 2; //camera non si muove --> centrata
+        } else { // Altrimenti
+        	cameraX = Math.max(minCameraX, Math.min(desiredCameraX, maxCameraX));
+            //min: valore più piccolo tra desiderata e il limite max (non oltre bordo destro)
+            //max: valore più grande tra il limite min e il risultato precedente
         }
         
-        
+        //asse verticale
+        //centro su mario sempre
         int desiredCameraY = mario.getY() - WINDOW_HEIGHT / 2;
         int minCameraY = 0;
         int maxCameraY = mapHeightPixels - WINDOW_HEIGHT;
         
         // Limita verticalmente
-        // Se la mappa è più piccola della finestra, centrala
-        if (mapHeightPixels < WINDOW_HEIGHT) {
-            //cameraY = maxCameraY / 2;
+        if (mapHeightPixels < WINDOW_HEIGHT) { //mappa è più piccola della finestra, centrala
         	cameraY = 0;
         } else { // Altrimenti, blocca ai bordi della mappa
             cameraY = Math.max(minCameraY, Math.min(desiredCameraY, maxCameraY));
+            //uguale a limite orizzontale
         }
     }
     
+    /**
+     * Metodo che disegna un box per il punteggio del giocatore
+     * @param g2d
+     */
     private void drawScore(Graphics2D g2d) {
         int padding = 10; // distanza dai bordi
         int boxWidth = 95;
@@ -305,6 +303,10 @@ public class GamePanel extends JPanel implements Runnable{
         g2d.drawString("Score: " + mario.getScore(), padding + 10, padding + 25);
     }
     
+    /**
+     * Metodo che disegna il logo del gioco
+     * @param g2d
+     */
     private void drawLogo(Graphics2D g2d) {
     	Image imageIcon = null;
         java.net.URL logoUrl = getClass().getResource("/images/logo.png");
@@ -319,6 +321,10 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     
+    /**
+     * Metodo che disegna tutte le componenti
+     * @param g2d
+     */
     public void drawWorld (Graphics2D g2d) {
     	// Calcola quali tile sono visibili
         int startCol = cameraX / TileMap.TILE_SIZE;
@@ -340,9 +346,9 @@ public class GamePanel extends JPanel implements Runnable{
         	endRow = tileMap.getRows();
         }
         
-        //System.out.println("DEBUG: CameraX finale: " + cameraX + ", MaxCameraX calcolato: " + (tileMap.getCols() * TileMap.TILE_SIZE - WINDOW_WIDTH + (2 * TileMap.TILE_SIZE))); // Assumendo 2 tile extra
-
-        // Itera su ogni livello visibile
+        //System.out.println("DEBUG: CameraX finale: " + cameraX + ", MaxCameraX calcolato: " + (tileMap.getCols() * TileMap.TILE_SIZE - WINDOW_WIDTH + (2 * TileMap.TILE_SIZE))); 
+        
+        // Itera su ogni livello visibile della tileMap
         for (int layerIndex = 0; layerIndex < tileMap.getNumLayers(); layerIndex++) {
             for (int row = startRow; row < endRow; row++) {
                 for (int col = startCol; col < endCol; col++) {
@@ -367,43 +373,47 @@ public class GamePanel extends JPanel implements Runnable{
             }
         }
         
-        //blocchi
+        //DISEGNA LE COMPONENTI
+        //Blocchi
         for (Block block : blocks) {
         	block.draw(g2d, cameraX, cameraY);
         }
         
-        
+        //Mario
 	    if(this.mario!= null) {
 	    	mario.draw(g2d, cameraX, cameraY);
 	    }
 	    
-	 // Disegna i nemici
+	 // Nemici
 	    for (Enemy enemy : enemies) {
 	        enemy.draw(g2d, cameraX, cameraY);
 	    }
 
-	    // Disegna le monete
+	    // Monete
 	    for (Coin coin : coins) {
 	        coin.draw(g2d, cameraX, cameraY);
 	    }
 
-	    // Disegna i power-up
+	    // Power-up
 	    for (PowerUp powerUp : powerUps) {
 	        powerUp.draw(g2d, cameraX, cameraY);
 	    }
 	    
+	    //Logo e punteggio
 	    drawScore(g2d);
 	    drawLogo(g2d);
 
    }
 		
+    /**
+     * disegno e aggiornamento pannello
+     */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
 		
+		//se game over
 		if(gameState == GameState.GAME_OVER) {
-			
-			
 			//Overlay nero semitrasparente
 			g2d.setColor(new Color (0, 0, 0, 180));
 			g2d.fillRect(0, 0, getWidth(), getHeight());
@@ -419,7 +429,7 @@ public class GamePanel extends JPanel implements Runnable{
 	        g2d.drawString("Premi Invio per ricominciare", getWidth()/2 - 140, getHeight()/2 + 50);
 
 	        return; // non disegnare altro
-		} else if (gameState == GameState.WIN) {
+		} else if (gameState == GameState.WIN) { //se vittoria
 		    drawWorld(g2d);
 
 		    // Overlay verde semi-trasparente
@@ -442,34 +452,21 @@ public class GamePanel extends JPanel implements Runnable{
 		
     }
 
-	/**
-	 * @return the gameState
-	 */
+	//GETTER E SETTER
 	public GameState getGameState() {
 		return gameState;
 	}
 
-	/**
-	 * @param gameState the gameState to set
-	 */
 	public void setGameState(GameState gameState) {
 		this.gameState = gameState;
 	}
 
-	/**
-	 * @return the mario
-	 */
 	public Player getMario() {
 		return mario;
 	}
 
-	/**
-	 * @param mario the mario to set
-	 */
 	public void setMario(Player mario) {
 		this.mario = mario;
 	}
-	
-
 }
 	

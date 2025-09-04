@@ -1,35 +1,31 @@
 package beans;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
-
 import javax.swing.ImageIcon;
-
 import core.TileMap;
 
 public class Koopa extends Enemy {
-	private boolean isDangerous;
 	private boolean isInShell;
 	private Image koopaSmash;
+	private long shellStartTime;
 	
-	public static final int WIDTH_KOOPA = 25;
-	public static final int HEIGHT_KOOPA = 30;
-	public static final int WIDTH_SHELL = 4;
-	public static final int HEIGHT_SHELL = 4;
-    private static final long SHELL_DURATION = 5000;
-    public static final double KOOPA_DAMAGE = 0.5;
-    
-    public long shellStartTime = 0;
+	private static final int WIDTH_KOOPA = 25;
+	private static final int HEIGHT_KOOPA = 30;
+	private static final int WIDTH_SHELL = 16;
+	private static final int HEIGHT_SHELL = 16;
+    private static final long SHELL_DURATION = 1000;
+    //private static final double KOOPA_DAMAGE = 0.5;
+    private static final double KOOPA_DAMAGE = 1;
     
 	
 	public Koopa (int x, int y) {
 		super (x, y, WIDTH_KOOPA, HEIGHT_KOOPA, null);
-		this.isDangerous = true;
 		this.isInShell = false;
+		this.shellStartTime = 0;
 		
+		//estraggo le immagini
 		try {
 			java.net.URL imageUrl = getClass().getResource("/tiles/tile_10.png");
 	        if (imageUrl != null) {
@@ -55,70 +51,69 @@ public class Koopa extends Enemy {
 	    }
 	}
 
+	/**
+	 * Metodo che definisce il moto del Koopa
+	 */
+	@Override
+	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
+	    if (this.isAlive && this.isInShell) { //se koopa è vivo e nel guscio
+	        long currentTime = System.currentTimeMillis(); //salvo il tempo
+	        if (currentTime - shellStartTime >= SHELL_DURATION) { //se il tempo attuale è più grande del momento di schiacciamento + durata di guscio
+	            this.isRemovable = true; //si può rimuovere
+	            this.isAlive = false; // muore
+	        }
+	    } else if (this.isAlive && !isInShell) { //se è vivo e non è nel guscio
+	        super.update(mapWidthPixels, mapHeightPixels, tileMap);// è un normale nemico --> metodo update() di Enemy
+	    }
+	} 
+		
+	/**
+	 * Metodo che applica il danno a Mario se il Koopa è vivo
+	 */
 	@Override
 	public void dealDamage(Player mario) {
 		if (this.isAlive) {
-			mario.takeDamage(KOOPA_DAMAGE);
+			mario.takeDamage(KOOPA_DAMAGE);// danno a mario = meno vita
 		}
 	}
 	
+	/**
+	 * Metodo che implementa lo stato del Koopa nel guscio.
+	 * In questo modo non è pericoloso (solo se colpito da sopra) e rimane vivo per qualche secondo, prima di morire e sparire
+	 */
+	public void toShell() {
+		if (!this.isInShell) { // se non è nel guscio
+			this.isDangerous = false; //setto tutto
+			this.isMovingLeft = false;
+			this.isMovingRight = false;
+			this.isInShell = true;
+			this.isRemovable = false;
+			this.y += 14; // abbasso la sua posizione per farlo apparire 'a terra'
+			this.vel_x = 0;
+			this.vel_y = 0;
+			this.height = HEIGHT_SHELL;
+			this.width = WIDTH_SHELL;
+			shellStartTime = System.currentTimeMillis(); //scatta il timer per la sparizione
+		}	
+	}
+	
+	/**
+	 * Metodo che definisce la morte diretta
+	 */
 	@Override
 	public void die() {
 		this.isAlive = false;
 		this.isInShell = true;
 		this.isDangerous = false;
-		this.isRemovable = false;
+		this.isRemovable = true;
 		this.vel_x = 0;
 		this.vel_y = 0;
 	}
 	
 	
-
-
-	@Override
-	public void update(int mapWidthPixels, int mapHeightPixels, TileMap tileMap) {
-	    if (!this.isAlive) {
-	        // Se morto, potresti voler gestire la rimozione come per Goomba
-	        // o semplicemente non aggiornarlo più
-	        return;
-	    }
-
-	    // Logica per tornare allo stato normale dal guscio
-	    upgradeStatus();
-
-	    // Logica di movimento basata sullo stato
-	    if (isInShell) {
-	        // Se nel guscio e sta rotolando (vel_x != 0), continua a muoversi
-	        // Altrimenti, è fermo nel guscio, non si muove.
-	        // La vel_x verrebbe impostata esternamente dal CollisionManager quando Mario "calcia" il guscio.
-	        if (this.vel_x != 0) {
-	            super.update(mapWidthPixels, mapHeightPixels, tileMap); // Applica movimento e gravità
-	        } else {
-	            // È nel guscio fermo, applica solo gravità se non a terra
-	            if (!isOnGround) {
-	                this.vel_y += g;
-	            }
-	            this.y += this.vel_y;
-	            // TODO: Aggiungi qui un controllo collisioni verticali base per il guscio fermo
-	        }
-	    } else {
-	        // Stato normale: si muove come un normale nemico
-	        if (isMovingLeft) {
-	            this.vel_x = -Enemy.VEL_X;
-	        } else if (isMovingRight) {
-	            this.vel_x = Enemy.VEL_X;
-	        } else {
-	            this.vel_x = 0;
-	        }
-	        super.update(mapWidthPixels, mapHeightPixels, tileMap);
-	    }
-
-	    // Gestione della caduta dalla mappa
-	    if (this.y > mapHeightPixels + 100) {
-	        this.die();
-	    }
-	}
-
+	/**
+	 * Metodo che disegna il koopa con le immagini importate dal costruttore
+	 */
 	@Override
 	public void draw(Graphics2D g, int cameraX, int cameraY) {
 		int screenX = this.x - cameraX;
@@ -143,27 +138,18 @@ public class Koopa extends Enemy {
 			
 		} 
 	}
-		
-	public void toShell() {
-		if (!this.isInShell) {
-			this.isDangerous = false;
-			this.isMovingLeft = false;
-			this.isMovingRight = false;
-			this.isInShell = true;
-			this.vel_x = 0;
-			this.height = HEIGHT_SHELL;
-			this.width = WIDTH_SHELL;
-			shellStartTime = System.currentTimeMillis();
-		}	
-	}
+
+	//Sono due metodi scritti per eventualmente amplicare il progetto, lasciando che il koopa torni al suo stato normale dopo il tempo previsto 
+	//e che muoia solo se colpito di nuovo
+	//NON USATI
 	
-	public void toNormalSize() {
+	/*public void toNormalSize() {
 		if (this.isInShell) {
 			this.isDangerous = true;
 			this.isInShell = false;
 			this.isMovingRight = false;
 			this.isMovingLeft = true;
-			this.vel_x = this.VEL_X;
+			this.vel_x = Enemy.VEL_X;
 			this.height = HEIGHT_KOOPA;
 			this.width = WIDTH_KOOPA;
 			shellStartTime = 0;
@@ -177,8 +163,55 @@ public class Koopa extends Enemy {
 	            toNormalSize();
 	         }
 	     }
-	 }
-	 
-	 
+	 }*/
+	
+	//GETTER E SETTER
+	
+	public boolean isInShell() {
+		return isInShell;
+	}
 
+	public Image getKoopaSmash() {
+		return koopaSmash;
+	}
+
+	public long getShellStartTime() {
+		return shellStartTime;
+	}
+
+	public static int getWidthKoopa() {
+		return WIDTH_KOOPA;
+	}
+
+	public static int getHeightKoopa() {
+		return HEIGHT_KOOPA;
+	}
+
+	public static int getWidthShell() {
+		return WIDTH_SHELL;
+	}
+
+	public static int getHeightShell() {
+		return HEIGHT_SHELL;
+	}
+
+	public static long getShellDuration() {
+		return SHELL_DURATION;
+	}
+
+	public static double getKoopaDamage() {
+		return KOOPA_DAMAGE;
+	}
+
+	public void setInShell(boolean isInShell) {
+		this.isInShell = isInShell;
+	}
+
+	public void setKoopaSmash(Image koopaSmash) {
+		this.koopaSmash = koopaSmash;
+	}
+
+	public void setShellStartTime(long shellStartTime) {
+		this.shellStartTime = shellStartTime;
+	}
 }

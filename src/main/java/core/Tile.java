@@ -2,6 +2,9 @@ package core;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * Classe che definisce il concetto di componenente (16*16 px) di una mappa 
+ */
 public class Tile {
     private int id;
     private boolean isSolid;
@@ -13,6 +16,11 @@ public class Tile {
         this.isSolid = determinateSolidState(id);
     }
     
+    /**
+     * definisce lo stato solido di alcune tile, per la creazione della mappa di base
+     * @param tileId
+     * @return true/false 
+     */
     private boolean determinateSolidState(int tileId) {
         switch (tileId) {
             //case 1: 
@@ -24,7 +32,7 @@ public class Tile {
             case 25:
             case 26:
             case 27:
-                return true; // Questi ID sono solidi
+                return true; // Queste tile sono solide
             
             default:
                 System.out.println("Avviso: Tile ID " + tileId + " non ha una definizione di solidità esplicita. Considerata non solida.");
@@ -32,20 +40,23 @@ public class Tile {
         }
     }
 
-    
-    
-    /**
-	 * @return the isSolid
-	 */
+    //GETTER E SETTER
+	public int getId() {
+		return id;
+	}
+
 	public boolean isSolid() {
 		return isSolid;
 	}
 
-	public int getId() {
-        return id;
-    }
+	public BufferedImage getImage() {
+		return image;
+	}
 
-    public BufferedImage getImage() {
-        return image;
-    }
+
+	public void setImage(BufferedImage image) {
+		this.image = image;
+	}
+
+    
 }

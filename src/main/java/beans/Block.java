@@ -69,7 +69,6 @@ public abstract class Block extends GameObject {
 	public boolean isHit() {
 		return isHit;
 	}
-
 	
 	public int getBounceVelY() {
 		return bounceVelY;

@@ -5,6 +5,9 @@ import java.awt.Graphics2D;
 import javax.swing.ImageIcon;
 import core.TileMap;
 
+/**
+ * Classe che definsce l'oggetto Moneta, non dinamico, raccoglibile da Mario.
+ */
 public class Coin extends GameObject {
 	private int value;
 	private int vel_y;

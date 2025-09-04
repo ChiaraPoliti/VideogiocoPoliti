@@ -2,7 +2,6 @@ package logic;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import beans.Block;
 import beans.BreakableBlock;
 import beans.Coin;
@@ -11,8 +10,11 @@ import beans.Goomba;
 import beans.Koopa;
 import beans.QuestionBlock;
 
+/**
+ * Classe che definisce gli elemeti beans che formano il livello
+ * In questo caso è l'unico implementato
+ */
 public class Level1 {
-
     private List<Enemy> enemies;
     private List<Block> blocks;
     private List<Coin> coins;
@@ -25,6 +27,12 @@ public class Level1 {
         buildLevel(enemies, coins, blocks);
     }
 
+    /**
+     * Metodo che crea il livello: aggiunge i beans dove devono andare
+     * @param enemies
+     * @param coins
+     * @param blocks
+     */
     private void buildLevel(List <Enemy> enemies, List <Coin> coins, List <Block> blocks) {
     	// Aggiungi nemici
         enemies.add(new Goomba(250, 128));
@@ -56,9 +64,7 @@ public class Level1 {
         blocks.add(new QuestionBlock (528, 80, enums.itemType.COIN));
         blocks.add(new QuestionBlock (560, 80, enums.itemType.COIN));
     }
-    
-    
-
+   
     // Getter per il GamePanel
     public List<Enemy> getEnemies() {
         return enemies;
