@@ -109,13 +109,6 @@ public class Player extends MovableGameObject {
 	}
 	
 	/**
-	 * Riceve il potenziamento fungo e applica il metodo di crescita
-	 **/
-	public void getMushroom (Mushroom mushroom) {
-		this.toBig();
-	}
-	
-	/**
 	 * Fa crescere le misure di Mario.
 	 **/
 	public void toBig() {

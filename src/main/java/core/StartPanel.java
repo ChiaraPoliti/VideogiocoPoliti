@@ -57,5 +57,5 @@ public class StartPanel extends JPanel {
         if (background != null) {
             g.drawImage(background, 0, 0, getWidth(), getHeight(), this);
         }
-    }
+   }
 }
